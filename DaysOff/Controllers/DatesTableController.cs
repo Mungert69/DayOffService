@@ -20,9 +20,28 @@ namespace DaysOff.Controllers
             _context = context;
         }
 
-        private List<User> getActiveUsers() {
-            List<User> users = new List<User>();
-            users = _context.Users.Where(u => u.StartDate < DateTime.Now && u.EndDate > DateTime.Now).ToList();
+        private List<string> getTypes()
+        {
+            List<string> types = new List<string>();
+            return Enum.GetValues(typeof(Holiday.HolTypes))
+     .Cast<Holiday.HolTypes>()
+     .Select(v => v.ToString())
+     .ToList();
+           
+        }
+
+        private List<string> getDurations()
+        {
+            List<string> durations = new List<string>();
+
+            return Enum.GetValues(typeof(Holiday.Durations))
+    .Cast<Holiday.Durations>()
+    .Select(v => v.ToString())
+    .ToList();
+        }
+        private List<UserBase> getActiveUsers() {
+            List<UserBase> users = new List<UserBase>();
+            users = _context.Users.Where(u => u.StartDate < DateTime.Now && u.EndDate > DateTime.Now).Select(s => new UserBase(s.ID,s.LastName,s.FirstName,s.StartDate,s.EndDate)).ToList();
 
             return users;
         }
@@ -41,8 +60,8 @@ namespace DaysOff.Controllers
             
 
             List<DateTime> headerDates = new List<DateTime>();
-            List<string> userRow = new List<string>();
-            List<User> users = getActiveUsers();
+            List<HolidayBase> userRow = new List<HolidayBase>();
+            List<UserBase> users = getActiveUsers();
             List<UserDataRow> userDataRows = new List<UserDataRow>();
             WeekData weekData = new WeekData();
 
@@ -53,17 +72,17 @@ namespace DaysOff.Controllers
             }
             headerDates.Add(to);
 
-            foreach (User user in users)
+            foreach (UserBase user in users)
             {
-                userRow = new List<string>();
+                userRow = new List<HolidayBase>();
                 foreach (DateTime date in headerDates)
                 {
-                    var holData= _context.Holidays.Where(h => h.UserID == user.ID && h.HolDate == date).Select(s => new { s.Duration, s.HolType }).FirstOrDefault();
+                    var holData= _context.Holidays.Where(h => h.UserID == user.ID && h.HolDate == date).FirstOrDefault();
                     if (holData == null) {
-                        userRow.Add("");
+                        userRow.Add(new HolidayBase(-1));
                     }
                     else {
-                        userRow.Add(holData.Duration + " : " + holData.HolType);
+                        userRow.Add(new HolidayBase(holData.HolidayID,(HolidayBase.HolTypes)holData.HolType,(HolidayBase.Durations)holData.Duration,holData.HolDate));
                     }
                  }
                 UserDataRow userDataRow = new UserDataRow();
@@ -77,9 +96,23 @@ namespace DaysOff.Controllers
             return weekData;
         }
 
+        // GET api/DatesTable/GetTypes
+        [HttpGet("GetDurations")]
+        public ActionResult<IEnumerable<string>> GetDurations()
+        {
+            return getDurations();
+        }
+
+        // GET api/DatesTable/GetTypes
+        [HttpGet("GetTypes")]
+        public ActionResult<IEnumerable<string>> GetTypes()
+        {
+            return getTypes();
+        }
+
         // GET api/DatesTable/ActiveUsers
         [HttpGet("ActiveUsers")]
-        public ActionResult<IEnumerable<User>> ActiveUsers()
+        public ActionResult<IEnumerable<UserBase>> ActiveUsers()
         {
              return getActiveUsers();
         }
@@ -107,6 +140,15 @@ namespace DaysOff.Controllers
         {
         }
 
+        // PUT api/DatesTable/EditHoliday/holUpdate 
+        [HttpPut("{holUpdate}")]
+        public string EditHoliday(string holUpdate, [FromBody] string value)
+        {
+
+            string result = "failed";
+
+            return result; 
+        }
         // PUT api/DatesTable/5
         [HttpPut("{id}")]
         public void Put(int id, [FromBody] string value)

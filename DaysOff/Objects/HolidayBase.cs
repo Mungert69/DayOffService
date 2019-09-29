@@ -1,15 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DayOff.Models
+namespace DaysOff.Objects
 {
-
-
-    public class Holiday
+    public class HolidayBase
     {
+
+        public HolidayBase(int id)
+        {
+            HolidayID = id;
+        }
+
+        public HolidayBase(int holidayID, HolTypes? holType, Durations? duration, DateTime holDate) : this(holidayID)
+        {
+            HolType = holType;
+            Duration = duration;
+            HolDate = holDate;
+        }
+
         public enum HolTypes
         {
             H, D, X
@@ -19,18 +29,14 @@ namespace DayOff.Models
         {
             AM, PM, DO
         }
-   
+
         public int HolidayID { get; set; }
         public int UserID { get; set; }
-       
+
         public HolTypes? HolType { get; set; }
         public Durations? Duration { get; set; }
         public DateTime HolDate { get; set; }
 
-        public User User { get; set; }
-
-
 
     }
-
 }
