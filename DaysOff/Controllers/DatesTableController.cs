@@ -140,12 +140,22 @@ namespace DaysOff.Controllers
         {
         }
 
-        // PUT api/DatesTable/EditHoliday/holUpdate 
-        [HttpPut("{holUpdate}")]
-        public string EditHoliday(string holUpdate, [FromBody] string value)
+        // GET api/DatesTable/UpdateHoliday/id/date/userid 
+        [HttpGet("UpdateHoliday/{id}/{type}/{duration}")]
+        public string UpdateHoliday([FromRoute] int id, [FromRoute] int type, [FromRoute] int duration)
         {
-
             string result = "failed";
+            if (id == -1)
+            {
+                return "";
+            }
+
+            DayOff.Models.Holiday holiday =  _context.Holidays.Find(id);
+            holiday.HolType = (Holiday.HolTypes)type;
+            holiday.Duration = (Holiday.Durations)duration;
+
+            _context.Update(holiday);
+             _context.SaveChanges();
 
             return result; 
         }
