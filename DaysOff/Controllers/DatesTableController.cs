@@ -83,7 +83,7 @@ namespace DaysOff.Controllers
                     var holData = _context.Holidays.Where(h => h.UserID == user.ID && h.HolDate == date).FirstOrDefault();
                     if (holData == null)
                     {
-                        userRow.Add(new HolidayBase(-1, (HolidayBase.HolTypes)1, (HolidayBase.Durations)2, date, user.ID));
+                        userRow.Add(new HolidayBase(-1, (HolidayBase.HolTypes)2, (HolidayBase.Durations)1, date, user.ID));
                     }
                     else
                     {
