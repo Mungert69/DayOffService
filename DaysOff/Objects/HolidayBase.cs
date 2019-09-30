@@ -13,11 +13,12 @@ namespace DaysOff.Objects
             HolidayID = id;
         }
 
-        public HolidayBase(int holidayID, HolTypes? holType, Durations? duration, DateTime holDate) : this(holidayID)
+        public HolidayBase(int holidayID, HolTypes? holType, Durations? duration, DateTime holDate,int userID) : this(holidayID)
         {
             HolType = holType;
             Duration = duration;
             HolDate = holDate;
+            UserID = userID;
         }
 
         public enum HolTypes

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using DayOff.Data;
 using DayOff.Models;
 using DaysOff.Objects;
+using DaysOff.Utils;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DaysOff.Controllers
@@ -27,7 +28,7 @@ namespace DaysOff.Controllers
      .Cast<Holiday.HolTypes>()
      .Select(v => v.ToString())
      .ToList();
-           
+
         }
 
         private List<string> getDurations()
@@ -39,9 +40,10 @@ namespace DaysOff.Controllers
     .Select(v => v.ToString())
     .ToList();
         }
-        private List<UserBase> getActiveUsers() {
+        private List<UserBase> getActiveUsers()
+        {
             List<UserBase> users = new List<UserBase>();
-            users = _context.Users.Where(u => u.StartDate < DateTime.Now && u.EndDate > DateTime.Now).Select(s => new UserBase(s.ID,s.LastName,s.FirstName,s.StartDate,s.EndDate)).ToList();
+            users = _context.Users.Where(u => u.StartDate < DateTime.Now && u.EndDate > DateTime.Now).Select(s => new UserBase(s.ID, s.LastName, s.FirstName, s.StartDate, s.EndDate)).ToList();
 
             return users;
         }
@@ -52,12 +54,13 @@ namespace DaysOff.Controllers
         {
             DateTime from;
             DateTime to;
-            try {
+            try
+            {
                 from = DateTime.Parse(fromStr);
-                 to = DateTime.Parse(toStr);
+                to = DateTime.Parse(toStr);
             }
             catch { return null; }
-            
+
 
             List<DateTime> headerDates = new List<DateTime>();
             List<HolidayBase> userRow = new List<HolidayBase>();
@@ -77,14 +80,16 @@ namespace DaysOff.Controllers
                 userRow = new List<HolidayBase>();
                 foreach (DateTime date in headerDates)
                 {
-                    var holData= _context.Holidays.Where(h => h.UserID == user.ID && h.HolDate == date).FirstOrDefault();
-                    if (holData == null) {
-                        userRow.Add(new HolidayBase(-1));
+                    var holData = _context.Holidays.Where(h => h.UserID == user.ID && h.HolDate == date).FirstOrDefault();
+                    if (holData == null)
+                    {
+                        userRow.Add(new HolidayBase(-1, (HolidayBase.HolTypes)1, (HolidayBase.Durations)2, date, user.ID));
                     }
-                    else {
-                        userRow.Add(new HolidayBase(holData.HolidayID,(HolidayBase.HolTypes)holData.HolType,(HolidayBase.Durations)holData.Duration,holData.HolDate));
+                    else
+                    {
+                        userRow.Add(new HolidayBase(holData.HolidayID, (HolidayBase.HolTypes)holData.HolType, (HolidayBase.Durations)holData.Duration, holData.HolDate, user.ID));
                     }
-                 }
+                }
                 UserDataRow userDataRow = new UserDataRow();
                 userDataRow.User = user;
                 userDataRow.UserRow = userRow;
@@ -114,7 +119,7 @@ namespace DaysOff.Controllers
         [HttpGet("ActiveUsers")]
         public ActionResult<IEnumerable<UserBase>> ActiveUsers()
         {
-             return getActiveUsers();
+            return getActiveUsers();
         }
 
         // GET api/DatesTable/AllUsers
@@ -140,24 +145,81 @@ namespace DaysOff.Controllers
         {
         }
 
-        // GET api/DatesTable/UpdateHoliday/id/date/userid 
-        [HttpGet("UpdateHoliday/{id}/{type}/{duration}")]
-        public string UpdateHoliday([FromRoute] int id, [FromRoute] int type, [FromRoute] int duration)
+        // GET api/DatesTable/DeleteHoliday/holidayID 
+        [HttpGet("DeleteHoliday/{holidayId}")]
+        public IActionResult DeleteHoliday([FromRoute] int holidayId)
         {
-            string result = "failed";
-            if (id == -1)
+            string result = "Delete failed.";
+
+            try
             {
-                return "";
+                DayOff.Models.Holiday holiday = _context.Holidays.Find(holidayId);
+
+
+                _context.Remove(holiday);
+                _context.SaveChanges();
             }
 
-            DayOff.Models.Holiday holiday =  _context.Holidays.Find(id);
-            holiday.HolType = (Holiday.HolTypes)type;
-            holiday.Duration = (Holiday.Durations)duration;
+            catch (Exception e) { return Ok(JsonUtils.ConvertJsonStr(result + " : " + e.Message)); }
+            result = "Deleted ok.";
+            return Ok(JsonUtils.ConvertJsonStr(result));
+            ;
+        }
 
-            _context.Update(holiday);
-             _context.SaveChanges();
 
-            return result; 
+        // GET api/DatesTable/UpdateHoliday/userId/type/duration/date 
+        [HttpGet("CreateHoliday/{userId}/{type}/{duration}/{dateStr}")]
+        public IActionResult CreateHoliday([FromRoute] int userId, [FromRoute] int type, [FromRoute] int duration, [FromRoute] string dateStr)
+        {
+            string result = "Create failed.";
+            DateTime holDate;
+            try
+            {
+                holDate = DateTime.Parse(dateStr);
+
+                DayOff.Models.Holiday holiday = new Holiday();
+                holiday.HolType = (Holiday.HolTypes)type;
+                holiday.Duration = (Holiday.Durations)duration;
+                holiday.UserID = userId;
+                holiday.HolDate = holDate;
+
+
+                _context.Add(holiday);
+                _context.SaveChanges();
+
+            }
+            catch (Exception e) { return Ok(JsonUtils.ConvertJsonStr(result + " : " + e.Message)); }
+
+
+            result = "Created ok.";
+
+            return Ok(JsonUtils.ConvertJsonStr(result));
+        }
+
+
+        // GET api/DatesTable/UpdateHoliday/id/type/duration 
+        [HttpGet("UpdateHoliday/{id}/{type}/{duration}")]
+        public IActionResult UpdateHoliday([FromRoute] int id, [FromRoute] int type, [FromRoute] int duration)
+        {
+            string result = "Update failed.";
+            if (id == -1)
+            {
+                return Ok(JsonUtils.ConvertJsonStr("Update failed. HolidayID=-1"));
+       
+            }
+            try
+            {
+                DayOff.Models.Holiday holiday = _context.Holidays.Find(id);
+                holiday.HolType = (Holiday.HolTypes)type;
+                holiday.Duration = (Holiday.Durations)duration;
+
+                _context.Update(holiday);
+                _context.SaveChanges();
+            }
+            catch (Exception e) { return Ok(JsonUtils.ConvertJsonStr(result + " : " + e.Message)); }
+
+            result = "Updated Ok.";
+            return Ok(JsonUtils.ConvertJsonStr(result));
         }
         // PUT api/DatesTable/5
         [HttpPut("{id}")]
@@ -172,5 +234,5 @@ namespace DaysOff.Controllers
         }
     }
 
-   
+
 }
