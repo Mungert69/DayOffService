@@ -25,13 +25,13 @@ namespace DayOff.Data
 
             var users = new User[]
             {
-            new User{FirstName="MahaDeva",LastName="",StartDate=DateTime.Now.AddDays(-1), EndDate=DateTime.Now.AddYears(999)},
-            new User{FirstName="Tom",LastName="",StartDate=DateTime.Now.AddDays(-1), EndDate=DateTime.Now.AddYears(999)},
-            new User{FirstName="Premal",LastName="",StartDate=DateTime.Now.AddDays(-1), EndDate=DateTime.Now.AddYears(999)},
-            new User{FirstName="Khalsa",LastName="",StartDate=DateTime.Now.AddDays(-1), EndDate=DateTime.Now.AddYears(999)},
-            new User{FirstName="Adam",LastName="",StartDate=DateTime.Now.AddDays(-1), EndDate=DateTime.Now.AddYears(999)},
-            new User{FirstName="Supriti",LastName="",StartDate=DateTime.Now.AddDays(-1), EndDate=DateTime.Now.AddYears(999)},
-            new User{FirstName="Bob",LastName="Dylan",StartDate=DateTime.Now.AddYears(-30), EndDate=DateTime.Now.AddYears(-29)},
+            new User{FirstName="MahaDeva",LastName="",StartDate=DateTime.Now.AddDays(-1), EndDate=DateTime.Now.AddYears(999),noHolidays=12,noHalfDaysOff=3},
+            new User{FirstName="Tom",LastName="",StartDate=DateTime.Now.AddDays(-1), EndDate=DateTime.Now.AddYears(999),noHolidays=12,noHalfDaysOff=3},
+            new User{FirstName="Premal",LastName="",StartDate=DateTime.Now.AddDays(-1), EndDate=DateTime.Now.AddYears(999),noHolidays=12,noHalfDaysOff=3},
+            new User{FirstName="Khalsa",LastName="",StartDate=DateTime.Now.AddDays(-1), EndDate=DateTime.Now.AddYears(999),noHolidays=12,noHalfDaysOff=3},
+            new User{FirstName="Adam",LastName="",StartDate=DateTime.Now.AddDays(-1), EndDate=DateTime.Now.AddYears(999),noHolidays=12,noHalfDaysOff=3},
+            new User{FirstName="Supriti",LastName="",StartDate=DateTime.Now.AddDays(-1), EndDate=DateTime.Now.AddYears(999),noHolidays=12,noHalfDaysOff=3},
+            new User{FirstName="Bob",LastName="Dylan",StartDate=DateTime.Now.AddYears(-30), EndDate=DateTime.Now.AddYears(-29),noHolidays=12,noHalfDaysOff=3},
 
             };
             foreach (User s in users)

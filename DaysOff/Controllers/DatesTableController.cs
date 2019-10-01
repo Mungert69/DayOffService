@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DayOff.Data;
 using DayOff.Models;
+using DaysOff.ExtensionMethods;
 using DaysOff.Objects;
 using DaysOff.Utils;
 using Microsoft.AspNetCore.Mvc;
@@ -48,6 +49,43 @@ namespace DaysOff.Controllers
             return users;
         }
 
+        private int convertToHalfDays(int duration,int type)
+        {
+            switch (type) {
+                case 1:
+                    return 0;
+                case 2:
+                    return 0;
+                case 3:
+                    return 1;
+            }
+
+            switch (duration)
+            {
+                case 0:
+                    return 1;
+                case 1:
+                    return 1;
+                case 2:
+                    return 2;            
+            }
+            return 0;
+        }
+        private bool countDaysOk( DateTime holDate, int userId) {
+            DateTime startDate = holDate.StartOfWeek(DayOfWeek.Monday);
+            DateTime endDate = startDate.AddDays(6) ;
+            List<Holiday> holidays = _context.Holidays.Where(h => h.UserID == userId && h.HolDate >= startDate && h.HolDate <=endDate).ToList();
+            int halfDays = 0;
+            foreach (Holiday hol in holidays)
+            {
+                halfDays += convertToHalfDays((int)hol.Duration,(int)hol.HolType); 
+            }
+            int userHalfDays = _context.Users.Where(h => h.ID == userId).Select(s => s.noHalfDaysOff).FirstOrDefault();
+            if (halfDays < userHalfDays) { return false; }
+            else { return true; }
+           
+        }
+
         // GET api/DatesTable/WeekData
         [HttpGet("WeekData/{fromStr}/{toStr}")]
         public ActionResult<WeekData> WeekData([FromRoute] string fromStr, [FromRoute] string toStr)
@@ -83,7 +121,7 @@ namespace DaysOff.Controllers
                     var holData = _context.Holidays.Where(h => h.UserID == user.ID && h.HolDate == date).FirstOrDefault();
                     if (holData == null)
                     {
-                        userRow.Add(new HolidayBase(-1, (HolidayBase.HolTypes)2, (HolidayBase.Durations)1, date, user.ID));
+                        userRow.Add(new HolidayBase(-1, (HolidayBase.HolTypes)2, (HolidayBase.Durations)2, date, user.ID));
                     }
                     else
                     {
@@ -107,6 +145,14 @@ namespace DaysOff.Controllers
         {
             return getDurations();
         }
+
+        // GET api/DatesTable/GetUsers
+        [HttpGet("GetUsers")]
+        public ActionResult<IEnumerable<UserBase>> GetUsers()
+        {
+            return getActiveUsers();
+        }
+
 
         // GET api/DatesTable/GetTypes
         [HttpGet("GetTypes")]
@@ -173,11 +219,16 @@ namespace DaysOff.Controllers
         {
             string result = "Create failed.";
             DateTime holDate;
+           
             try
             {
                 holDate = DateTime.Parse(dateStr);
-
-                DayOff.Models.Holiday holiday = new Holiday();
+                if (countDaysOk(holDate, userId))
+                {
+                    result = "To many days off selected.";
+                    return Ok(JsonUtils.ConvertJsonStr(result));
+                }
+                    DayOff.Models.Holiday holiday = new Holiday();
                 holiday.HolType = (Holiday.HolTypes)type;
                 holiday.Duration = (Holiday.Durations)duration;
                 holiday.UserID = userId;
@@ -212,7 +263,11 @@ namespace DaysOff.Controllers
                 DayOff.Models.Holiday holiday = _context.Holidays.Find(id);
                 holiday.HolType = (Holiday.HolTypes)type;
                 holiday.Duration = (Holiday.Durations)duration;
-
+                if (countDaysOk(holiday.HolDate, holiday.UserID))
+                {
+                    result = "To many days off selected.";
+                    return Ok(JsonUtils.ConvertJsonStr(result));
+                }
                 _context.Update(holiday);
                 _context.SaveChanges();
             }

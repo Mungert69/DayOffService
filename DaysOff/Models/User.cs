@@ -15,6 +15,10 @@ namespace DayOff.Models
             public DateTime StartDate { get; set; }
             public DateTime EndDate { get; set; }
 
+            public int noHolidays { get; set; }
+
+            public int noHalfDaysOff { get; set; }
+
             public ICollection<Holiday> Holidays { get; set; }
         
     }

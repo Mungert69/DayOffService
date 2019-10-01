@@ -12,7 +12,7 @@ namespace DayOff.Models
     {
         public enum HolTypes
         {
-            H, D, X
+            D, H, X, HD
         }
 
         public enum Durations
