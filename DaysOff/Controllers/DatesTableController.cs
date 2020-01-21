@@ -41,10 +41,10 @@ namespace DaysOff.Controllers
     .Select(v => v.ToString())
     .ToList();
         }
-        private List<UserBase> getActiveUsers()
+        private List<UserBase> getActiveUsers(DateTime dateCheck)
         {
             List<UserBase> users = new List<UserBase>();
-            users = _context.Users.Where(u => u.StartDate < DateTime.Now && u.EndDate > DateTime.Now).Select(s => new UserBase(s.ID, s.LastName, s.FirstName, s.StartDate, s.EndDate)).ToList();
+            users = _context.Users.Where(u => u.StartDate < DateTime.Now && u.EndDate > dateCheck).Select(s => new UserBase(s.ID, s.LastName, s.FirstName, s.StartDate, s.EndDate)).ToList();
 
             return users;
         }
@@ -70,6 +70,69 @@ namespace DaysOff.Controllers
                     return 2;            
             }
             return 0;
+        }
+       
+
+        private bool staffCountOk(DateTime holDate,int duration,int type, bool isAm)
+        {
+           List<Holiday> holidays = _context.Holidays.Where(h =>  h.HolDate == holDate).ToList();
+            int amCount = 0;
+            int pmCount = 0;
+            foreach (Holiday hol in holidays)
+            {
+                switch ((int)hol.HolType)
+                {
+                    case 3:
+                        amCount++;
+                        pmCount++;
+                        continue;
+                }
+                switch ((int)hol.Duration)
+                {
+                    case 0:
+                        amCount++;
+                        break;
+                    case 1:
+                        pmCount++ ;
+                        break;
+                    case 2:
+                        amCount++;
+                        pmCount++;
+                        break;
+                   
+                }
+            }
+            if (type == 3) {
+                amCount++;
+                pmCount++;
+            }
+            else
+            {
+                switch (duration)
+                {
+                    case 0:
+                        amCount++;
+                        break;
+                    case 1:
+                        pmCount++;
+                        break;
+                    case 2:
+                        amCount++;
+                        pmCount++;
+                        break;
+
+                }
+            }
+           
+            int staffTotal = getActiveUsers(holDate).Count();
+            if (isAm) {
+                if (amCount <= (staffTotal - 2)) { return false; }
+            }
+            else { 
+                if (pmCount <= (staffTotal - 2)) { return false; }
+            }
+            return true;
+
         }
         private bool countDaysOk( DateTime holDate, int userId) {
             DateTime startDate = holDate.StartOfWeek(DayOfWeek.Monday);
@@ -123,7 +186,7 @@ namespace DaysOff.Controllers
 
             List<DateTime> headerDates = new List<DateTime>();
             List<HolidayBase> userRow = new List<HolidayBase>();
-            List<UserBase> users = getActiveUsers();
+            List<UserBase> users = getActiveUsers(DateTime.Now);
             List<UserDataRow> userDataRows = new List<UserDataRow>();
             WeekData weekData = new WeekData();
 
@@ -171,7 +234,7 @@ namespace DaysOff.Controllers
         [HttpGet("GetUsers")]
         public ActionResult<IEnumerable<UserBase>> GetUsers()
         {
-            return getActiveUsers();
+            return getActiveUsers(DateTime.Now);
         }
 
 
@@ -186,7 +249,7 @@ namespace DaysOff.Controllers
         [HttpGet("ActiveUsers")]
         public ActionResult<IEnumerable<UserBase>> ActiveUsers()
         {
-            return getActiveUsers();
+            return getActiveUsers(DateTime.Now);
         }
 
         // GET api/DatesTable/AllUsers
@@ -240,7 +303,7 @@ namespace DaysOff.Controllers
         {
             string result = "Create failed.";
             DateTime holDate;
-           
+  
             try
             {
                 holDate = DateTime.Parse(dateStr);
@@ -249,11 +312,21 @@ namespace DaysOff.Controllers
                     result = "To many days off selected.";
                     return Ok(JsonUtils.ConvertJsonStr(result));
                 }
-               /* if (countHolidaysOk(holDate, userId, duration, type))
+                if (staffCountOk(holDate,  duration,type, true))
                 {
-                    result = "To many holidays selected.";
+                    result = "To many staff off in the morning of this day.";
                     return Ok(JsonUtils.ConvertJsonStr(result));
-                }*/
+                }
+                if (staffCountOk(holDate, duration,type, false))
+                {
+                    result = "To many staff off in the afternoon of this day.";
+                    return Ok(JsonUtils.ConvertJsonStr(result));
+                }
+                /* if (countHolidaysOk(holDate, userId, duration, type))
+                 {
+                     result = "To many holidays selected.";
+                     return Ok(JsonUtils.ConvertJsonStr(result));
+                 }*/
 
                 DayOff.Models.Holiday holiday = new Holiday();
                 holiday.HolType = (Holiday.HolTypes)type;
@@ -289,15 +362,49 @@ namespace DaysOff.Controllers
             }
             try
             {
-                DayOff.Models.Holiday holiday = _context.Holidays.Find(id);
-                holiday.HolType = (Holiday.HolTypes)type;
-                holiday.Duration = (Holiday.Durations)duration;
-                if (countDaysOk(holiday.HolDate, holiday.UserID))
+                DayOff.Models.Holiday origHoliday = _context.Holidays.Find(id);
+                int userId = origHoliday.UserID;
+                DateTime holDate = origHoliday.HolDate;
+                int origType = (int)origHoliday.HolType;
+                int origDuration = (int)origHoliday.Duration;
+                _context.Remove(origHoliday);
+                _context.SaveChanges();
+                DayOff.Models.Holiday holiday = new Holiday();
+                holiday.HolType = (Holiday.HolTypes)origType;
+                holiday.Duration = (Holiday.Durations)origDuration;
+                holiday.UserID = userId;
+                holiday.HolDate = holDate;
+               
+                
+                if (countDaysOk(holiday.HolDate, holiday.UserID,duration,type))
                 {
+                    _context.Add(holiday);
+                    _context.SaveChanges();
                     result = "To many days off selected.";
                     return Ok(JsonUtils.ConvertJsonStr(result));
                 }
-                _context.Update(holiday);
+                if (staffCountOk(holiday.HolDate, duration, type, true))
+                {
+                    _context.Add(holiday);
+                    _context.SaveChanges();
+                    result = "To many staff off in the morning of this day.";
+                    return Ok(JsonUtils.ConvertJsonStr(result));
+                }
+                if (staffCountOk(holiday.HolDate, duration, type, false))
+                {
+                    _context.Add(holiday);
+                    _context.SaveChanges();
+                    result = "To many staff off in the afternoon of this day.";
+                    return Ok(JsonUtils.ConvertJsonStr(result));
+                }
+                /* if (countHolidaysOk(holDate, userId, duration, type))
+                 {
+                     result = "To many holidays selected.";
+                     return Ok(JsonUtils.ConvertJsonStr(result));
+                 }*/
+                holiday.HolType = (Holiday.HolTypes)type;
+                holiday.Duration = (Holiday.Durations)duration;
+                _context.Add(holiday);
                 _context.SaveChanges();
             }
             catch (Exception e) { return Ok(JsonUtils.ConvertJsonStr(result + " : " + e.Message)); }
