@@ -86,6 +86,27 @@ namespace DaysOff.Controllers
            
         }
 
+        private bool countDaysOk(DateTime holDate, int userId,int duration, int type)
+        {
+            DateTime startDate = holDate.StartOfWeek(DayOfWeek.Monday);
+            DateTime endDate = startDate.AddDays(6);
+            List<Holiday> holidays = _context.Holidays.Where(h => h.UserID == userId && h.HolDate >= startDate && h.HolDate <= endDate).ToList();
+            int halfDays = 0;
+            foreach (Holiday hol in holidays)
+            {
+                halfDays += convertToHalfDays((int)hol.Duration, (int)hol.HolType);
+            }
+            halfDays += convertToHalfDays(duration, type);
+            int userHalfDays = _context.Users.Where(h => h.ID == userId).Select(s => s.noHalfDaysOff).FirstOrDefault();
+            if (halfDays <= userHalfDays) { return false; }
+            else { return true; }
+
+        }
+        private bool countHolidaysOk(DateTime holDate, int userId, int duration, int type)
+        {
+            throw new NotImplementedException();
+        }
+
         // GET api/DatesTable/WeekData
         [HttpGet("WeekData/{fromStr}/{toStr}")]
         public ActionResult<WeekData> WeekData([FromRoute] string fromStr, [FromRoute] string toStr)
@@ -223,12 +244,18 @@ namespace DaysOff.Controllers
             try
             {
                 holDate = DateTime.Parse(dateStr);
-                if (countDaysOk(holDate, userId))
+                if (countDaysOk(holDate, userId,duration,type))
                 {
                     result = "To many days off selected.";
                     return Ok(JsonUtils.ConvertJsonStr(result));
                 }
-                    DayOff.Models.Holiday holiday = new Holiday();
+               /* if (countHolidaysOk(holDate, userId, duration, type))
+                {
+                    result = "To many holidays selected.";
+                    return Ok(JsonUtils.ConvertJsonStr(result));
+                }*/
+
+                DayOff.Models.Holiday holiday = new Holiday();
                 holiday.HolType = (Holiday.HolTypes)type;
                 holiday.Duration = (Holiday.Durations)duration;
                 holiday.UserID = userId;
@@ -246,6 +273,8 @@ namespace DaysOff.Controllers
 
             return Ok(JsonUtils.ConvertJsonStr(result));
         }
+
+        
 
 
         // GET api/DatesTable/UpdateHoliday/id/type/duration 
