@@ -17,10 +17,13 @@ namespace DayOff.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Holiday> Holidays { get; set; }
 
+        public DbSet<WorkDay> WorkDays { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>().ToTable("Users");
             modelBuilder.Entity<Holiday>().ToTable("Holidays");
+            modelBuilder.Entity<WorkDay>().ToTable("WorkDays");
         }
     
 

@@ -22,11 +22,21 @@ namespace DaysOff.Controllers
             _context = context;
         }
 
-        private List<string> getTypes()
+        private List<string> getHolTypes()
         {
             List<string> types = new List<string>();
-            return Enum.GetValues(typeof(Holiday.HolTypes))
-     .Cast<Holiday.HolTypes>()
+            return Enum.GetValues(typeof(HolTypes))
+     .Cast<HolTypes>()
+     .Select(v => v.ToString())
+     .ToList();
+
+        }
+
+        private List<string> getWorkTypes()
+        {
+            List<string> types = new List<string>();
+            return Enum.GetValues(typeof(WorkTypes))
+     .Cast<WorkTypes>()
      .Select(v => v.ToString())
      .ToList();
 
@@ -36,8 +46,8 @@ namespace DaysOff.Controllers
         {
             List<string> durations = new List<string>();
 
-            return Enum.GetValues(typeof(Holiday.Durations))
-    .Cast<Holiday.Durations>()
+            return Enum.GetValues(typeof(Durations))
+    .Cast<Durations>()
     .Select(v => v.ToString())
     .ToList();
         }
@@ -185,7 +195,7 @@ namespace DaysOff.Controllers
 
 
             List<DateTime> headerDates = new List<DateTime>();
-            List<HolidayBase> userRow = new List<HolidayBase>();
+            List<EventBase> userRow = new List<EventBase>();
             List<UserBase> users = getActiveUsers(DateTime.Now);
             List<UserDataRow> userDataRows = new List<UserDataRow>();
             WeekData weekData = new WeekData();
@@ -199,17 +209,24 @@ namespace DaysOff.Controllers
 
             foreach (UserBase user in users)
             {
-                userRow = new List<HolidayBase>();
+                userRow = new List<EventBase>();
                 foreach (DateTime date in headerDates)
                 {
                     var holData = _context.Holidays.Where(h => h.UserID == user.ID && h.HolDate == date).FirstOrDefault();
                     if (holData == null)
                     {
-                        userRow.Add(new HolidayBase(-1, (HolidayBase.HolTypes)2, (HolidayBase.Durations)2, date, user.ID));
+                        var workData = _context.WorkDays.Where(w => w.UserID == user.ID && w.WorkDate == date).FirstOrDefault();
+                        if (workData == null)
+                        {
+                            userRow.Add(new WorkBase(-1, (WorkTypes)0, (Durations)0, date, user.ID));
+                        }
+                        else {
+                            userRow.Add(new WorkBase(workData.WorkID, (WorkTypes)workData.WorkType, (Durations)workData.Duration, date, user.ID));
+                        }
                     }
                     else
                     {
-                        userRow.Add(new HolidayBase(holData.HolidayID, (HolidayBase.HolTypes)holData.HolType, (HolidayBase.Durations)holData.Duration, holData.HolDate, user.ID));
+                        userRow.Add(new HolidayBase(holData.HolidayID, (HolTypes)holData.HolType, (Durations)holData.Duration, holData.HolDate, user.ID));
                     }
                 }
                 UserDataRow userDataRow = new UserDataRow();
@@ -238,11 +255,18 @@ namespace DaysOff.Controllers
         }
 
 
-        // GET api/DatesTable/GetTypes
-        [HttpGet("GetTypes")]
-        public ActionResult<IEnumerable<string>> GetTypes()
+        // GET api/DatesTable/GetHolTypes
+        [HttpGet("GetHolTypes")]
+        public ActionResult<IEnumerable<string>> GetHolTypes()
         {
-            return getTypes();
+            return getHolTypes();
+        }
+
+        // GET api/DatesTable/GetWorkTypes
+        [HttpGet("GetWorkTypes")]
+        public ActionResult<IEnumerable<string>> GetWorkTypes()
+        {
+            return getWorkTypes();
         }
 
         // GET api/DatesTable/ActiveUsers
@@ -275,19 +299,35 @@ namespace DaysOff.Controllers
         {
         }
 
-        // GET api/DatesTable/DeleteHoliday/holidayID 
-        [HttpGet("DeleteHoliday/{holidayId}")]
-        public IActionResult DeleteHoliday([FromRoute] int holidayId)
+        private void deleteIntEvent(int eventId, int eventType) {
+            if (eventType == 0)
+            {
+                DayOff.Models.Holiday holiday = _context.Holidays.Find(eventId);
+
+
+                _context.Remove(holiday);
+                _context.SaveChanges();
+            }
+            if (eventType == 1)
+            {
+                DayOff.Models.WorkDay workDay = _context.WorkDays.Find(eventId);
+
+
+                _context.Remove(workDay);
+                _context.SaveChanges();
+            }
+        
+        }
+
+        // GET api/DatesTable/DeleteEvent/holidayID 
+        [HttpGet("DeleteEvent/{eventId}/{eventType}")]
+        public IActionResult DeleteEvent([FromRoute] int eventId, [FromRoute] int eventType)
         {
             string result = "Delete failed.";
 
             try
             {
-                DayOff.Models.Holiday holiday = _context.Holidays.Find(holidayId);
-
-
-                _context.Remove(holiday);
-                _context.SaveChanges();
+                deleteIntEvent(eventId, eventType);
             }
 
             catch (Exception e) { return Ok(JsonUtils.ConvertJsonStr(result + " : " + e.Message)); }
@@ -297,62 +337,101 @@ namespace DaysOff.Controllers
         }
 
 
-        // GET api/DatesTable/UpdateHoliday/userId/type/duration/date 
-        [HttpGet("CreateHoliday/{userId}/{type}/{duration}/{dateStr}")]
-        public IActionResult CreateHoliday([FromRoute] int userId, [FromRoute] int type, [FromRoute] int duration, [FromRoute] string dateStr)
-        {
-            string result = "Create failed.";
-            DateTime holDate;
-  
-            try
+        private string createIntEvent(int eventType, string dateStr, int userId, int duration, int type) {
+            string result;
+            DateTime eventDate;
+            if (eventType == 0)
             {
-                holDate = DateTime.Parse(dateStr);
-                if (countDaysOk(holDate, userId,duration,type))
+                eventDate = DateTime.Parse(dateStr);
+                if (countDaysOk(eventDate, userId, duration, type))
                 {
                     result = "To many days off selected.";
-                    return Ok(JsonUtils.ConvertJsonStr(result));
+                    return result;
                 }
-                if (staffCountOk(holDate,  duration,type, true))
+                if (staffCountOk(eventDate, duration, type, true))
                 {
                     result = "To many staff off in the morning of this day.";
-                    return Ok(JsonUtils.ConvertJsonStr(result));
+                    return result;
                 }
-                if (staffCountOk(holDate, duration,type, false))
+                if (staffCountOk(eventDate, duration, type, false))
                 {
                     result = "To many staff off in the afternoon of this day.";
-                    return Ok(JsonUtils.ConvertJsonStr(result));
+                    return result;
                 }
-                /* if (countHolidaysOk(holDate, userId, duration, type))
+                /* if (countHolidaysOk(eventDate, userId, duration, type))
                  {
                      result = "To many holidays selected.";
                      return Ok(JsonUtils.ConvertJsonStr(result));
                  }*/
 
                 DayOff.Models.Holiday holiday = new Holiday();
-                holiday.HolType = (Holiday.HolTypes)type;
-                holiday.Duration = (Holiday.Durations)duration;
+                holiday.HolType = (HolTypes)type;
+                holiday.Duration = (Durations)duration;
                 holiday.UserID = userId;
-                holiday.HolDate = holDate;
+                holiday.HolDate = eventDate;
 
 
                 _context.Add(holiday);
                 _context.SaveChanges();
+            }
+            if (eventType == 1)
+            {
+                eventDate = DateTime.Parse(dateStr);
+
+                DayOff.Models.WorkDay workDay = new WorkDay();
+                workDay.WorkType = (WorkTypes)type;
+                workDay.Duration = (Durations)duration;
+                workDay.UserID = userId;
+                workDay.WorkDate = eventDate;
+
+
+                _context.Add(workDay);
+                _context.SaveChanges();
+            }
+           return "Created ok.";
+        }
+
+        // GET api/DatesTable/UpdateHoliday/userId/type/duration/date 
+        [HttpGet("CreateEvent/{userId}/{type}/{duration}/{dateStr}/{eventType}")]
+        public IActionResult CreateEvent([FromRoute] int userId, [FromRoute] int type, [FromRoute] int duration, [FromRoute] string dateStr, [FromRoute] int eventType)
+        {
+            string result = "";
+            
+
+  
+            try
+            {
+                result= createIntEvent(eventType,dateStr,userId,duration,type);
+                return Ok(JsonUtils.ConvertJsonStr(result));
 
             }
             catch (Exception e) { return Ok(JsonUtils.ConvertJsonStr(result + " : " + e.Message)); }
 
-
-            result = "Created ok.";
-
-            return Ok(JsonUtils.ConvertJsonStr(result));
         }
 
-        
+        // GET api/DatesTable/UpdateHoliday/userId/type/duration/date 
+        [HttpGet("SwapEvent/{userId}/{type}/{duration}/{dateStr}/{eventType}/{oldEventType}/{eventId}")]
+        public IActionResult SwapEvent([FromRoute] int userId, [FromRoute] int type, [FromRoute] int duration, [FromRoute] string dateStr, [FromRoute] int eventType, [FromRoute] int oldEventType, [FromRoute] int eventId)
+        {
+            string result = "";
 
 
-        // GET api/DatesTable/UpdateHoliday/id/type/duration 
-        [HttpGet("UpdateHoliday/{id}/{type}/{duration}")]
-        public IActionResult UpdateHoliday([FromRoute] int id, [FromRoute] int type, [FromRoute] int duration)
+
+            try
+            {
+                deleteIntEvent(eventId, oldEventType);
+                result = createIntEvent(eventType, dateStr, userId, duration, type);
+                return Ok(JsonUtils.ConvertJsonStr(result));
+
+            }
+            catch (Exception e) { return Ok(JsonUtils.ConvertJsonStr(result + " : " + e.Message)); }
+
+        }
+
+
+        // GET api/DatesTable/UpdateEvent/id/type/duration 
+        [HttpGet("UpdateEvent/{id}/{type}/{duration}/{eventType}")]
+        public IActionResult UpdateEvent([FromRoute] int id, [FromRoute] int type, [FromRoute] int duration, [FromRoute] int eventType)
         {
             string result = "Update failed.";
             if (id == -1)
@@ -360,52 +439,77 @@ namespace DaysOff.Controllers
                 return Ok(JsonUtils.ConvertJsonStr("Update failed. HolidayID=-1"));
        
             }
+
             try
             {
-                DayOff.Models.Holiday origHoliday = _context.Holidays.Find(id);
-                int userId = origHoliday.UserID;
-                DateTime holDate = origHoliday.HolDate;
-                int origType = (int)origHoliday.HolType;
-                int origDuration = (int)origHoliday.Duration;
-                _context.Remove(origHoliday);
-                _context.SaveChanges();
-                DayOff.Models.Holiday holiday = new Holiday();
-                holiday.HolType = (Holiday.HolTypes)origType;
-                holiday.Duration = (Holiday.Durations)origDuration;
-                holiday.UserID = userId;
-                holiday.HolDate = holDate;
-               
-                
-                if (countDaysOk(holiday.HolDate, holiday.UserID,duration,type))
-                {
+                if (eventType == 0) {
+                    DayOff.Models.Holiday origHoliday = _context.Holidays.Find(id);
+                    int userId = origHoliday.UserID;
+                    DateTime holDate = origHoliday.HolDate;
+                    int origType = (int)origHoliday.HolType;
+                    int origDuration = (int)origHoliday.Duration;
+                    _context.Remove(origHoliday);
+                    _context.SaveChanges();
+                    DayOff.Models.Holiday holiday = new Holiday();
+                    holiday.HolType = (HolTypes)origType;
+                    holiday.Duration = (Durations)origDuration;
+                    holiday.UserID = userId;
+                    holiday.HolDate = holDate;
+
+
+                    if (countDaysOk(holiday.HolDate, holiday.UserID, duration, type))
+                    {
+                        _context.Add(holiday);
+                        _context.SaveChanges();
+                        result = "To many days off selected.";
+                        return Ok(JsonUtils.ConvertJsonStr(result));
+                    }
+                    if (staffCountOk(holiday.HolDate, duration, type, true))
+                    {
+                        _context.Add(holiday);
+                        _context.SaveChanges();
+                        result = "To many staff off in the morning of this day.";
+                        return Ok(JsonUtils.ConvertJsonStr(result));
+                    }
+                    if (staffCountOk(holiday.HolDate, duration, type, false))
+                    {
+                        _context.Add(holiday);
+                        _context.SaveChanges();
+                        result = "To many staff off in the afternoon of this day.";
+                        return Ok(JsonUtils.ConvertJsonStr(result));
+                    }
+                    /* if (countHolidaysOk(holDate, userId, duration, type))
+                     {
+                         result = "To many holidays selected.";
+                         return Ok(JsonUtils.ConvertJsonStr(result));
+                     }*/
+                    holiday.HolType = (HolTypes)type;
+                    holiday.Duration = (Durations)duration;
                     _context.Add(holiday);
                     _context.SaveChanges();
-                    result = "To many days off selected.";
-                    return Ok(JsonUtils.ConvertJsonStr(result));
                 }
-                if (staffCountOk(holiday.HolDate, duration, type, true))
-                {
-                    _context.Add(holiday);
+                if (eventType == 1) {
+                    DayOff.Models.WorkDay origWorkDay = _context.WorkDays.Find(id);
+                    int userId = origWorkDay.UserID;
+                    DateTime workDate = origWorkDay.WorkDate;
+                    int origType = (int)origWorkDay.WorkType;
+                    int origDuration = (int)origWorkDay.Duration;
+                    _context.Remove(origWorkDay);
                     _context.SaveChanges();
-                    result = "To many staff off in the morning of this day.";
-                    return Ok(JsonUtils.ConvertJsonStr(result));
-                }
-                if (staffCountOk(holiday.HolDate, duration, type, false))
-                {
-                    _context.Add(holiday);
+                    DayOff.Models.WorkDay workDay = new WorkDay();
+                    workDay.WorkType = (WorkTypes)origType;
+                    workDay.Duration = (Durations)origDuration;
+                    workDay.UserID = userId;
+                    workDay.WorkDate = workDate;
+
+
+                    workDay.WorkType = (WorkTypes)type;
+                    workDay.Duration = (Durations)duration;
+                    _context.Add(workDay);
                     _context.SaveChanges();
-                    result = "To many staff off in the afternoon of this day.";
-                    return Ok(JsonUtils.ConvertJsonStr(result));
                 }
-                /* if (countHolidaysOk(holDate, userId, duration, type))
-                 {
-                     result = "To many holidays selected.";
-                     return Ok(JsonUtils.ConvertJsonStr(result));
-                 }*/
-                holiday.HolType = (Holiday.HolTypes)type;
-                holiday.Duration = (Holiday.Durations)duration;
-                _context.Add(holiday);
-                _context.SaveChanges();
+
+
             }
             catch (Exception e) { return Ok(JsonUtils.ConvertJsonStr(result + " : " + e.Message)); }
 

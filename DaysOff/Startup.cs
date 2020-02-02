@@ -58,7 +58,7 @@ namespace DayOff
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller}/{action=Index}/{id?}/{id2?}/{id3?}");
+                    template: "{controller}/{action=Index}/{id?}/{id2?}/{id3?}/{id4?}/{id5?}/{id6?}/{id7?}/{id8?}");
             });
         }
     }

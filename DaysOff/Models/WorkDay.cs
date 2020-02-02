@@ -9,17 +9,21 @@ namespace DayOff.Models
 {
 
 
-    public class Holiday
+    public class WorkDay
     {
-        
-       [Key] public int HolidayID { get; set; }
+
+
+        [Key]
+        public int WorkID { get; set; }
         public int UserID { get; set; }
-       
-        public HolTypes? HolType { get; set; }
+
+        public WorkTypes? WorkType { get; set; }
         public Durations? Duration { get; set; }
-        public DateTime HolDate { get; set; }
+        public DateTime WorkDate { get; set; }
 
         public User User { get; set; }
+
+
 
     }
 

@@ -10,9 +10,9 @@ namespace DaysOff.Objects
     {
 
         private UserBase user;
-        private List<HolidayBase> userRow;
+        private List<EventBase> userRow;
 
         public UserBase User { get => user; set => user = value; }
-        public List<HolidayBase> UserRow { get => userRow; set => userRow = value; }
+        public List<EventBase> UserRow { get => userRow; set => userRow = value; }
     }
 }

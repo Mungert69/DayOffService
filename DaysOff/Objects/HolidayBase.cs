@@ -5,38 +5,30 @@ using System.Threading.Tasks;
 
 namespace DaysOff.Objects
 {
-    public class HolidayBase
+    public enum HolTypes
+    {
+        H, D, X
+    }
+
+    
+    public class HolidayBase : EventBase
     {
 
-        public HolidayBase(int id)
-        {
-            HolidayID = id;
-        }
 
-        public HolidayBase(int holidayID, HolTypes? holType, Durations? duration, DateTime holDate,int userID) : this(holidayID)
+        public HolidayBase(int holidayID, HolTypes? holType, Durations? duration, DateTime holDate,int userID) : base(holidayID)
         {
             HolType = holType;
             Duration = duration;
-            HolDate = holDate;
+            EventDate = holDate;
             UserID = userID;
+            EventType = (EventTypes)0;
         }
 
-        public enum HolTypes
-        {
-            H, D, X
-        }
-
-        public enum Durations
-        {
-            AM, PM, DO
-        }
-
-        public int HolidayID { get; set; }
-        public int UserID { get; set; }
+       
 
         public HolTypes? HolType { get; set; }
-        public Durations? Duration { get; set; }
-        public DateTime HolDate { get; set; }
+     
+       
 
 
     }

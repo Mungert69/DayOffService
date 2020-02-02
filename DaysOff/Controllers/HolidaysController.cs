@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DayOff.Data;
 using DayOff.Models;
+using DaysOff.Objects;
 
 namespace DaysOff.Controllers
 {
@@ -19,14 +20,14 @@ namespace DaysOff.Controllers
             _context = context;
         }
 
-        public List<SelectListItem> HolTypeSelectList => Enum.GetValues(typeof(Holiday.HolTypes)).Cast<Holiday.HolTypes>().Select(v => new SelectListItem
+        public List<SelectListItem> HolTypeSelectList => Enum.GetValues(typeof(HolTypes)).Cast<HolTypes>().Select(v => new SelectListItem
         {
 
             Text = v.ToString(),
             Value = ((int)v).ToString()
         }).ToList();
 
-        public List<SelectListItem> DurationSelectList => Enum.GetValues(typeof(Holiday.Durations)).Cast<Holiday.Durations>().Select(v => new SelectListItem
+        public List<SelectListItem> DurationSelectList => Enum.GetValues(typeof(Durations)).Cast<Durations>().Select(v => new SelectListItem
         {
 
             Text = v.ToString(),

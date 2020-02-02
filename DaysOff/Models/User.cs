@@ -20,6 +20,7 @@ namespace DayOff.Models
             public int noHalfDaysOff { get; set; }
 
             public ICollection<Holiday> Holidays { get; set; }
-        
+        public ICollection<WorkDay> WorkDays { get; set; }
+
     }
 }
