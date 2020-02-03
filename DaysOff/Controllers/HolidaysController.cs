@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using DayOff.Data;
+using DayOff.Models;
+using DaysOff.Objects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using DayOff.Data;
-using DayOff.Models;
-using DaysOff.Objects;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace DaysOff.Controllers
 {
@@ -37,7 +37,7 @@ namespace DaysOff.Controllers
         // GET: Holidays
         public async Task<IActionResult> Index()
         {
-            var dayOffContext = _context.Holidays.Include(h => h.User);
+            Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Holiday, User> dayOffContext = _context.Holidays.Include(h => h.User);
             return View(await dayOffContext.ToListAsync());
         }
 
@@ -49,7 +49,7 @@ namespace DaysOff.Controllers
                 return NotFound();
             }
 
-            var holiday = await _context.Holidays
+            Holiday holiday = await _context.Holidays
                 .Include(h => h.User)
                 .FirstOrDefaultAsync(m => m.HolidayID == id);
             if (holiday == null)
@@ -94,7 +94,7 @@ namespace DaysOff.Controllers
                 return NotFound();
             }
 
-            var holiday = await _context.Holidays.FindAsync(id);
+            Holiday holiday = await _context.Holidays.FindAsync(id);
             if (holiday == null)
             {
                 return NotFound();
@@ -149,7 +149,7 @@ namespace DaysOff.Controllers
                 return NotFound();
             }
 
-            var holiday = await _context.Holidays
+            Holiday holiday = await _context.Holidays
                 .Include(h => h.User)
                 .FirstOrDefaultAsync(m => m.HolidayID == id);
             if (holiday == null)
@@ -165,7 +165,7 @@ namespace DaysOff.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var holiday = await _context.Holidays.FindAsync(id);
+            Holiday holiday = await _context.Holidays.FindAsync(id);
             _context.Holidays.Remove(holiday);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));

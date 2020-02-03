@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DaysOff.Objects
 {
     public enum WorkTypes
     {
-        OHC,HC,MK,K,DB,G,OG
+        OHC, HC, MK, K, DB, G, OG
     }
 
 

@@ -1,9 +1,5 @@
 ﻿using DayOff.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DayOff.Data
 {
@@ -25,7 +21,7 @@ namespace DayOff.Data
             modelBuilder.Entity<Holiday>().ToTable("Holidays");
             modelBuilder.Entity<WorkDay>().ToTable("WorkDays");
         }
-    
 
-}
+
+    }
 }

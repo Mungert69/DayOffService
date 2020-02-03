@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using DayOff.Data;
+﻿using DayOff.Data;
 using DayOff.Models;
 using DaysOff.ExtensionMethods;
 using DaysOff.Objects;
 using DaysOff.Utils;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DaysOff.Controllers
 {
@@ -59,9 +58,10 @@ namespace DaysOff.Controllers
             return users;
         }
 
-        private int convertToHalfDays(int duration,int type)
+        private int convertToHalfDays(int duration, int type)
         {
-            switch (type) {
+            switch (type)
+            {
                 case 0:
                     return 0;
                 case 2:
@@ -75,15 +75,15 @@ namespace DaysOff.Controllers
                 case 1:
                     return 1;
                 case 2:
-                    return 2;            
+                    return 2;
             }
             return 0;
         }
-       
 
-        private bool staffCountOk(DateTime holDate,int duration,int type, bool isAm)
+
+        private bool staffCountOk(DateTime holDate, int duration, int type, bool isAm)
         {
-           List<Holiday> holidays = _context.Holidays.Where(h =>  h.HolDate == holDate).ToList();
+            List<Holiday> holidays = _context.Holidays.Where(h => h.HolDate == holDate).ToList();
             int amCount = 0;
             int pmCount = 0;
             foreach (Holiday hol in holidays)
@@ -101,16 +101,17 @@ namespace DaysOff.Controllers
                         amCount++;
                         break;
                     case 1:
-                        pmCount++ ;
+                        pmCount++;
                         break;
                     case 2:
                         amCount++;
                         pmCount++;
                         break;
-                   
+
                 }
             }
-            if (type == 3) {
+            if (type == 3)
+            {
                 amCount++;
                 pmCount++;
             }
@@ -131,33 +132,36 @@ namespace DaysOff.Controllers
 
                 }
             }
-           
+
             int staffTotal = getActiveUsers(holDate).Count();
-            if (isAm) {
+            if (isAm)
+            {
                 if (amCount <= (staffTotal - 2)) { return false; }
             }
-            else { 
+            else
+            {
                 if (pmCount <= (staffTotal - 2)) { return false; }
             }
             return true;
 
         }
-        private bool countDaysOk( DateTime holDate, int userId) {
+        private bool countDaysOk(DateTime holDate, int userId)
+        {
             DateTime startDate = holDate.StartOfWeek(DayOfWeek.Monday);
-            DateTime endDate = startDate.AddDays(6) ;
-            List<Holiday> holidays = _context.Holidays.Where(h => h.UserID == userId && h.HolDate >= startDate && h.HolDate <=endDate).ToList();
+            DateTime endDate = startDate.AddDays(6);
+            List<Holiday> holidays = _context.Holidays.Where(h => h.UserID == userId && h.HolDate >= startDate && h.HolDate <= endDate).ToList();
             int halfDays = 0;
             foreach (Holiday hol in holidays)
             {
-                halfDays += convertToHalfDays((int)hol.Duration,(int)hol.HolType); 
+                halfDays += convertToHalfDays((int)hol.Duration, (int)hol.HolType);
             }
             int userHalfDays = _context.Users.Where(h => h.ID == userId).Select(s => s.noHalfDaysOff).FirstOrDefault();
             if (halfDays < userHalfDays) { return false; }
             else { return true; }
-           
+
         }
 
-        private bool countDaysOk(DateTime holDate, int userId,int duration, int type)
+        private bool countDaysOk(DateTime holDate, int userId, int duration, int type)
         {
             DateTime startDate = holDate.StartOfWeek(DayOfWeek.Monday);
             DateTime endDate = startDate.AddDays(6);
@@ -210,15 +214,16 @@ namespace DaysOff.Controllers
                 userRow = new List<EventBase>();
                 foreach (DateTime date in headerDates)
                 {
-                    var holData = _context.Holidays.Where(h => h.UserID == user.ID && h.HolDate == date && h.Duration == (Durations)0).FirstOrDefault();
+                    Holiday holData = _context.Holidays.Where(h => h.UserID == user.ID && h.HolDate == date && h.Duration == 0).FirstOrDefault();
                     if (holData == null)
                     {
-                        var workData = _context.WorkDays.Where(w => w.UserID == user.ID && w.WorkDate == date && w.Duration == (Durations)0).FirstOrDefault();
+                        WorkDay workData = _context.WorkDays.Where(w => w.UserID == user.ID && w.WorkDate == date && w.Duration == 0).FirstOrDefault();
                         if (workData == null)
                         {
-                            userRow.Add(new WorkBase(-1, (WorkTypes)0, (Durations)0, date, user.ID));
+                            userRow.Add(new WorkBase(-1, 0, 0, date, user.ID));
                         }
-                        else {
+                        else
+                        {
                             userRow.Add(new WorkBase(workData.WorkID, (WorkTypes)workData.WorkType, (Durations)workData.Duration, date, user.ID));
                         }
                     }
@@ -226,7 +231,7 @@ namespace DaysOff.Controllers
                     {
                         userRow.Add(new HolidayBase(holData.HolidayID, (HolTypes)holData.HolType, (Durations)holData.Duration, holData.HolDate, user.ID));
                     }
-                                  }
+                }
                 UserDataRow userDataRow = new UserDataRow();
                 userDataRow.User = user;
                 userDataRow.UserRow = userRow;
@@ -235,13 +240,13 @@ namespace DaysOff.Controllers
                 userRow = new List<EventBase>();
                 foreach (DateTime date in headerDates)
                 {
-                    var holData = _context.Holidays.Where(h => h.UserID == user.ID && h.HolDate == date && h.Duration == (Durations)1).FirstOrDefault();
+                    Holiday holData = _context.Holidays.Where(h => h.UserID == user.ID && h.HolDate == date && h.Duration == (Durations)1).FirstOrDefault();
                     if (holData == null)
                     {
-                        var workData = _context.WorkDays.Where(w => w.UserID == user.ID && w.WorkDate == date && w.Duration == (Durations)1).FirstOrDefault();
+                        WorkDay workData = _context.WorkDays.Where(w => w.UserID == user.ID && w.WorkDate == date && w.Duration == (Durations)1).FirstOrDefault();
                         if (workData == null)
                         {
-                            userRow.Add(new WorkBase(-1, (WorkTypes)0, (Durations)1, date, user.ID));
+                            userRow.Add(new WorkBase(-1, 0, (Durations)1, date, user.ID));
                         }
                         else
                         {
@@ -323,7 +328,8 @@ namespace DaysOff.Controllers
         {
         }
 
-        private void deleteIntEvent(int eventId, int eventType) {
+        private void deleteIntEvent(int eventId, int eventType)
+        {
             if (eventType == 0)
             {
                 DayOff.Models.Holiday holiday = _context.Holidays.Find(eventId);
@@ -340,7 +346,7 @@ namespace DaysOff.Controllers
                 _context.Remove(workDay);
                 _context.SaveChanges();
             }
-        
+
         }
 
         // GET api/DatesTable/DeleteEvent/holidayID 
@@ -361,7 +367,8 @@ namespace DaysOff.Controllers
         }
 
 
-        private string createIntEvent(int eventType, string dateStr, int userId, int duration, int type) {
+        private string createIntEvent(int eventType, string dateStr, int userId, int duration, int type)
+        {
             string result;
             DateTime eventDate;
             if (eventType == 0)
@@ -413,7 +420,7 @@ namespace DaysOff.Controllers
                 _context.Add(workDay);
                 _context.SaveChanges();
             }
-           return "Created ok.";
+            return "Created ok.";
         }
 
         // GET api/DatesTable/UpdateHoliday/userId/type/duration/date 
@@ -421,12 +428,12 @@ namespace DaysOff.Controllers
         public IActionResult CreateEvent([FromRoute] int userId, [FromRoute] int type, [FromRoute] int duration, [FromRoute] string dateStr, [FromRoute] int eventType)
         {
             string result = "";
-            
 
-  
+
+
             try
             {
-                result= createIntEvent(eventType,dateStr,userId,duration,type);
+                result = createIntEvent(eventType, dateStr, userId, duration, type);
                 return Ok(JsonUtils.ConvertJsonStr(result));
 
             }
@@ -462,12 +469,13 @@ namespace DaysOff.Controllers
             if (id == -1)
             {
                 return Ok(JsonUtils.ConvertJsonStr("Update failed. HolidayID=-1"));
-       
+
             }
 
             try
             {
-                if (eventType == 0) {
+                if (eventType == 0)
+                {
                     DayOff.Models.Holiday origHoliday = _context.Holidays.Find(id);
                     int userId = origHoliday.UserID;
                     DateTime holDate = origHoliday.HolDate;
@@ -513,7 +521,8 @@ namespace DaysOff.Controllers
                     _context.Add(holiday);
                     _context.SaveChanges();
                 }
-                if (eventType == 1) {
+                if (eventType == 1)
+                {
                     DayOff.Models.WorkDay origWorkDay = _context.WorkDays.Find(id);
                     int userId = origWorkDay.UserID;
                     DateTime workDate = origWorkDay.WorkDate;

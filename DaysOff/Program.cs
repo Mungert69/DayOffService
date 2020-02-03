@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using DayOff.Data;
+﻿using DayOff.Data;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System;
 
 namespace DayOff
 {
@@ -16,18 +11,18 @@ namespace DayOff
     {
         public static void Main(string[] args)
         {
-            var host = CreateWebHostBuilder(args).Build();
-            using (var scope = host.Services.CreateScope())
+            IWebHost host = CreateWebHostBuilder(args).Build();
+            using (IServiceScope scope = host.Services.CreateScope())
             {
-                var services = scope.ServiceProvider;
+                IServiceProvider services = scope.ServiceProvider;
                 try
                 {
-                    var context = services.GetRequiredService<DayOffContext>();
+                    DayOffContext context = services.GetRequiredService<DayOffContext>();
                     DbInitializer.Initialize(context);
                 }
                 catch (Exception ex)
                 {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    ILogger<Program> logger = services.GetRequiredService<ILogger<Program>>();
                     logger.LogError(ex, "An error occurred while seeding the database.");
                 }
             }
@@ -36,7 +31,7 @@ namespace DayOff
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-         
+
 
         WebHost.CreateDefaultBuilder(args).UseUrls("http://192.168.1.20:10202/")
                 .UseStartup<Startup>();

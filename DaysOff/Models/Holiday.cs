@@ -1,9 +1,6 @@
 ﻿using DaysOff.Objects;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DayOff.Models
 {
@@ -11,10 +8,10 @@ namespace DayOff.Models
 
     public class Holiday
     {
-        
-       [Key] public int HolidayID { get; set; }
+
+        [Key] public int HolidayID { get; set; }
         public int UserID { get; set; }
-       
+
         public HolTypes? HolType { get; set; }
         public Durations? Duration { get; set; }
         public DateTime HolDate { get; set; }

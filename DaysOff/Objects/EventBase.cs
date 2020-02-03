@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DaysOff.Objects
 {
@@ -22,7 +19,7 @@ namespace DaysOff.Objects
         {
             EventID = id;
         }
-        
+
 
         public EventTypes? EventType { get; set; }
         public Durations? Duration { get; set; }

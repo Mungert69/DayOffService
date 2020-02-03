@@ -1,5 +1,3 @@
-using System;
-
 namespace DayOff.Models
 {
     public class ErrorViewModel

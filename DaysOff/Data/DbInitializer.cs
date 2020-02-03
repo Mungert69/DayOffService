@@ -1,9 +1,6 @@
 ﻿using DayOff.Models;
-using DaysOff.ExtensionMethods;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 
 
@@ -23,7 +20,7 @@ namespace DayOff.Data
                 return;   // DB has been seeded
             }
 
-            var users = new User[]
+            User[] users = new User[]
             {
             new User{FirstName="MahaDeva",LastName="",StartDate=DateTime.Now.AddDays(-1), EndDate=DateTime.Now.AddYears(999),noHolidays=12,noHalfDaysOff=3},
             new User{FirstName="Khalsa",LastName="",StartDate=DateTime.Now.AddDays(-1), EndDate=DateTime.Now.AddYears(999),noHolidays=12,noHalfDaysOff=3},
@@ -42,7 +39,7 @@ namespace DayOff.Data
             }
             context.SaveChanges();
 
-          
+
         }
     }
 }
