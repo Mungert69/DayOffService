@@ -12,7 +12,7 @@ namespace DaysOff.Objects
     }
     public enum Durations
     {
-        AM, PM, DO
+        AM, PM
     }
     public class EventBase
     {

@@ -62,12 +62,10 @@ namespace DaysOff.Controllers
         private int convertToHalfDays(int duration,int type)
         {
             switch (type) {
-                case 1:
+                case 0:
                     return 0;
                 case 2:
                     return 0;
-                case 3:
-                    return 1;
             }
 
             switch (duration)
@@ -212,10 +210,10 @@ namespace DaysOff.Controllers
                 userRow = new List<EventBase>();
                 foreach (DateTime date in headerDates)
                 {
-                    var holData = _context.Holidays.Where(h => h.UserID == user.ID && h.HolDate == date).FirstOrDefault();
+                    var holData = _context.Holidays.Where(h => h.UserID == user.ID && h.HolDate == date && h.Duration == (Durations)0).FirstOrDefault();
                     if (holData == null)
                     {
-                        var workData = _context.WorkDays.Where(w => w.UserID == user.ID && w.WorkDate == date).FirstOrDefault();
+                        var workData = _context.WorkDays.Where(w => w.UserID == user.ID && w.WorkDate == date && w.Duration == (Durations)0).FirstOrDefault();
                         if (workData == null)
                         {
                             userRow.Add(new WorkBase(-1, (WorkTypes)0, (Durations)0, date, user.ID));
@@ -228,8 +226,34 @@ namespace DaysOff.Controllers
                     {
                         userRow.Add(new HolidayBase(holData.HolidayID, (HolTypes)holData.HolType, (Durations)holData.Duration, holData.HolDate, user.ID));
                     }
-                }
+                                  }
                 UserDataRow userDataRow = new UserDataRow();
+                userDataRow.User = user;
+                userDataRow.UserRow = userRow;
+                userDataRows.Add(userDataRow);
+
+                userRow = new List<EventBase>();
+                foreach (DateTime date in headerDates)
+                {
+                    var holData = _context.Holidays.Where(h => h.UserID == user.ID && h.HolDate == date && h.Duration == (Durations)1).FirstOrDefault();
+                    if (holData == null)
+                    {
+                        var workData = _context.WorkDays.Where(w => w.UserID == user.ID && w.WorkDate == date && w.Duration == (Durations)1).FirstOrDefault();
+                        if (workData == null)
+                        {
+                            userRow.Add(new WorkBase(-1, (WorkTypes)0, (Durations)1, date, user.ID));
+                        }
+                        else
+                        {
+                            userRow.Add(new WorkBase(workData.WorkID, (WorkTypes)workData.WorkType, (Durations)workData.Duration, date, user.ID));
+                        }
+                    }
+                    else
+                    {
+                        userRow.Add(new HolidayBase(holData.HolidayID, (HolTypes)holData.HolType, (Durations)holData.Duration, holData.HolDate, user.ID));
+                    }
+                }
+                userDataRow = new UserDataRow();
                 userDataRow.User = user;
                 userDataRow.UserRow = userRow;
                 userDataRows.Add(userDataRow);
@@ -363,6 +387,7 @@ namespace DaysOff.Controllers
                      result = "To many holidays selected.";
                      return Ok(JsonUtils.ConvertJsonStr(result));
                  }*/
+
 
                 DayOff.Models.Holiday holiday = new Holiday();
                 holiday.HolType = (HolTypes)type;
