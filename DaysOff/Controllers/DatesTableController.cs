@@ -21,24 +21,40 @@ namespace DaysOff.Controllers
             _context = context;
         }
 
-        private List<string> getHolTypes()
+        private List<SelectItem> getHolTypes()
         {
-            List<string> types = new List<string>();
-            return Enum.GetValues(typeof(HolTypes))
-     .Cast<HolTypes>()
-     .Select(v => v.ToString())
-     .ToList();
+            List<SelectItem> holidays = new List<SelectItem>();
+            SelectItem selectItem;
+            HolidayBase holidayBase = new HolidayBase();
+            List<HolTypes> holTypes = Enum.GetValues(typeof(HolTypes)).Cast<HolTypes>().ToList();
+            foreach (HolTypes holType in holTypes)
+            {
+                selectItem = new SelectItem();
+                selectItem.Label = holidayBase.HolNames[Convert.ToInt32(holType)];
+                selectItem.Value = holType.ToString();
+                selectItem.Id = Convert.ToInt32(holType);
+                holidays.Add(selectItem);
+            }
+            return holidays;
+           
 
         }
 
-        private List<string> getWorkTypes()
+        private List<SelectItem> getWorkTypes()
         {
-            List<string> types = new List<string>();
-            return Enum.GetValues(typeof(WorkTypes))
-     .Cast<WorkTypes>()
-     .Select(v => v.ToString())
-     .ToList();
+            List<SelectItem> types = new List<SelectItem>();
+            SelectItem selectItem;
+            WorkBase workBase = new WorkBase();
+            List<WorkTypes> workTypes= Enum.GetValues(typeof(WorkTypes)).Cast<WorkTypes>().ToList();
+            foreach (WorkTypes workType in workTypes) {
+                selectItem = new SelectItem();
+                selectItem.Label = workBase.WorkNames[Convert.ToInt32(workType)];
+                selectItem.Value = workType.ToString();
+                selectItem.Id = Convert.ToInt32(workType);
 
+                types.Add(selectItem);
+            }
+            return types;
         }
 
         private List<string> getDurations()
@@ -145,18 +161,16 @@ namespace DaysOff.Controllers
             return true;
 
         }
-        private bool countDaysOk(DateTime holDate, int userId)
+        private bool countHolidaysOk(DateTime holDate, int userId, int duration, int type)
         {
-            DateTime startDate = holDate.StartOfWeek(DayOfWeek.Monday);
-            DateTime endDate = startDate.AddDays(6);
-            List<Holiday> holidays = _context.Holidays.Where(h => h.UserID == userId && h.HolDate >= startDate && h.HolDate <= endDate).ToList();
-            int halfDays = 0;
-            foreach (Holiday hol in holidays)
-            {
-                halfDays += convertToHalfDays((int)hol.Duration, (int)hol.HolType);
-            }
-            int userHalfDays = _context.Users.Where(h => h.ID == userId).Select(s => s.noHalfDaysOff).FirstOrDefault();
-            if (halfDays < userHalfDays) { return false; }
+            User user = _context.Users.Where(u => u.ID == userId).FirstOrDefault();
+            DateTime startDate = user.StartDate;
+            DateTime endDate = user.EndDate;
+            List<Holiday> holidays = _context.Holidays.Where(h => h.UserID == userId && h.HolDate >= startDate && h.HolDate <= endDate && h.HolType == HolTypes.H).ToList();
+            int halfDays = holidays.Count()+1;
+            
+          
+             if (halfDays <= user.noHolidays) { return false; }
             else { return true; }
 
         }
@@ -177,11 +191,7 @@ namespace DaysOff.Controllers
             else { return true; }
 
         }
-        private bool countHolidaysOk(DateTime holDate, int userId, int duration, int type)
-        {
-            throw new NotImplementedException();
-        }
-
+      
         // GET api/DatesTable/WeekData
         [HttpGet("WeekData/{fromStr}/{toStr}")]
         public ActionResult<WeekData> WeekData([FromRoute] string fromStr, [FromRoute] string toStr)
@@ -286,14 +296,14 @@ namespace DaysOff.Controllers
 
         // GET api/DatesTable/GetHolTypes
         [HttpGet("GetHolTypes")]
-        public ActionResult<IEnumerable<string>> GetHolTypes()
+        public ActionResult<IEnumerable<SelectItem>> GetHolTypes()
         {
             return getHolTypes();
         }
 
         // GET api/DatesTable/GetWorkTypes
         [HttpGet("GetWorkTypes")]
-        public ActionResult<IEnumerable<string>> GetWorkTypes()
+        public ActionResult<IEnumerable<SelectItem>> GetWorkTypes()
         {
             return getWorkTypes();
         }
@@ -376,9 +386,14 @@ namespace DaysOff.Controllers
                 eventDate = DateTime.Parse(dateStr);
                 if (countDaysOk(eventDate, userId, duration, type))
                 {
-                    result = "To many days off selected.";
+                    result = "To many days off taken this week.";
                     return result;
                 }
+                 if (countHolidaysOk(eventDate, userId, duration, type))
+               {
+                   result = "To many holidays taken in contract period.";
+                   return result;
+               }
                 if (staffCountOk(eventDate, duration, type, true))
                 {
                     result = "To many staff off in the morning of this day.";
@@ -389,11 +404,7 @@ namespace DaysOff.Controllers
                     result = "To many staff off in the afternoon of this day.";
                     return result;
                 }
-                /* if (countHolidaysOk(eventDate, userId, duration, type))
-                 {
-                     result = "To many holidays selected.";
-                     return Ok(JsonUtils.ConvertJsonStr(result));
-                 }*/
+              
 
 
                 DayOff.Models.Holiday holiday = new Holiday();

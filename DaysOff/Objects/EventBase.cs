@@ -9,12 +9,14 @@ namespace DaysOff.Objects
     }
     public enum Durations
     {
-        AM, PM
+        AM=0, PM=1
     }
     public class EventBase
     {
         public int EventID { get; set; }
         public int UserID { get; set; }
+
+        public EventBase() { }  
         public EventBase(int id)
         {
             EventID = id;
