@@ -82,6 +82,8 @@ namespace DaysOff.Controllers
                     return 0;
                 case 2:
                     return 0;
+                case 3:
+                    return 0;
             }
 
             switch (duration)
