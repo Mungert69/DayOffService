@@ -200,7 +200,7 @@ namespace DaysOff.Controllers
         {
             DateTime from;
             DateTime to;
-            try
+              try
             {
                 from = DateTime.Parse(fromStr);
                 to = DateTime.Parse(toStr);
@@ -210,7 +210,7 @@ namespace DaysOff.Controllers
 
             List<DateTime> headerDates = new List<DateTime>();
             List<EventBase> userRow = new List<EventBase>();
-            List<UserBase> users = getActiveUsers(DateTime.Now);
+
             List<UserDataRow> userDataRows = new List<UserDataRow>();
             WeekData weekData = new WeekData();
 
@@ -220,7 +220,7 @@ namespace DaysOff.Controllers
                 headerDates.Add(from.AddDays(i));
             }
             headerDates.Add(to);
-
+            List<UserBase> users = getActiveUsers(from);
             foreach (UserBase user in users)
             {
                 userRow = new List<EventBase>();
@@ -294,6 +294,8 @@ namespace DaysOff.Controllers
         {
             return getActiveUsers(DateTime.Now);
         }
+
+       
 
 
         // GET api/DatesTable/GetHolTypes
