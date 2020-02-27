@@ -1,4 +1,5 @@
 ﻿using DayOff.Data;
+using DaysOff.Models.LeelaBack;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -23,6 +24,10 @@ namespace DayOff
 
             services.AddDbContext<DayOffContext>(options =>
                  options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<LeelaBackContext>(options =>
+                 options.UseSqlServer(Configuration.GetConnectionString("LeelaDBConnection")));
+
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddCors(options =>
             {

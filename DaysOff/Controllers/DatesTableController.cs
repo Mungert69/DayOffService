@@ -1,6 +1,7 @@
 ﻿using DayOff.Data;
 using DayOff.Models;
 using DaysOff.ExtensionMethods;
+using DaysOff.Models.LeelaBack;
 using DaysOff.Objects;
 using DaysOff.Utils;
 using Microsoft.AspNetCore.Mvc;
@@ -15,10 +16,12 @@ namespace DaysOff.Controllers
     public class DatesTableController : ControllerBase
     {
         private readonly DayOffContext _context;
+        private readonly LeelaBackContext _contextLeelaBack;
 
-        public DatesTableController(DayOffContext context)
+        public DatesTableController(DayOffContext context, LeelaBackContext contextLeelaBack )
         {
             _context = context;
+            _contextLeelaBack = contextLeelaBack;
         }
 
         private List<SelectItem> getHolTypes()
@@ -220,6 +223,30 @@ namespace DaysOff.Controllers
                 headerDates.Add(from.AddDays(i));
             }
             headerDates.Add(to);
+
+            int[] eventCountArray = new int[7];
+            int counter = 0;
+            List<Events> eventItems = new List<Events>();
+            foreach (DateTime headerDate in headerDates) {
+                List<Events> events = _contextLeelaBack.Events.Where(e => headerDate >= e.EventStart && headerDate <= e.EventEnd && (e.EventEnd - e.EventStart).Value.TotalDays < 15).ToList();
+                if (events.Count()>0) {
+                    foreach (Events eventItem in events) {
+                        if (!eventItems.Contains(eventItem)){
+                            eventItems.Add(eventItem);
+                        }
+                    }
+                    eventCountArray[counter] = events.Count();
+                }
+                else {
+                    eventCountArray[counter] = 0;
+                }
+                counter++;
+            }
+
+            EventData eventData = new EventData();
+            eventData.EventItems = eventItems;
+            eventData.DayCount = eventCountArray;
+
             List<UserBase> users = getActiveUsers(from);
             foreach (UserBase user in users)
             {
@@ -278,6 +305,7 @@ namespace DaysOff.Controllers
 
             weekData.HeaderDates = headerDates;
             weekData.UserDataRows = userDataRows;
+            weekData.EventData = eventData;
             return weekData;
         }
 
