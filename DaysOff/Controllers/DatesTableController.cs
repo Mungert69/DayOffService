@@ -235,7 +235,7 @@ namespace DaysOff.Controllers
             int counter = 0;
             List<Events> eventItems = new List<Events>();
             foreach (DateTime headerDate in headerDates) {
-                List<Events> events = _contextLeelaBack.Events.Where(e => headerDate >= e.EventStart && headerDate <= e.EventEnd && (e.EventEnd - e.EventStart).Value.TotalDays < 15).ToList();
+                List<Events> events = _contextLeelaBack.Events.Where(e => headerDate >= e.EventStart && headerDate <= e.EventEnd && (e.EventEnd - e.EventStart).Value.TotalDays < 15 && e.EventCancelled==null).ToList();
                 if (events.Count()>0) {
                     foreach (Events eventItem in events) {
                         if (!eventItems.Contains(eventItem)){
@@ -327,7 +327,7 @@ namespace DaysOff.Controllers
         [HttpGet("GetUsers")]
         public ActionResult<IEnumerable<UserBase>> GetUsers()
         {
-            return getActiveUsers(DateTime.Now);
+            return getActiveUsers(DateTime.Now.StartOfWeek(DayOfWeek.Monday));
         }
 
        
