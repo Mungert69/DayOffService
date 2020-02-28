@@ -71,10 +71,17 @@ namespace DaysOff.Controllers
         }
         private List<UserBase> getActiveUsers(DateTime dateCheck)
         {
-            List<UserBase> users = new List<UserBase>();
-            users = _context.Users.Where(u => u.StartDate < DateTime.Now && u.EndDate > dateCheck).Select(s => new UserBase(s.ID, s.LastName, s.FirstName, s.StartDate, s.EndDate)).ToList();
+            List<UserBase> userQuery = new List<UserBase>();
+            userQuery = _context.Users.Where(u => u.StartDate < DateTime.Now && u.EndDate > dateCheck).Select(s => new UserBase(s.ID, s.LastName, s.FirstName, s.StartDate, s.EndDate, (float)s.noHalfDaysOff/2, (float)s.noHolidays/2)).ToList();
 
-            return users;
+            List<Holiday> holidays;
+            List<UserBase> usersBase = new List<UserBase>();
+            foreach (UserBase userBase in userQuery) {
+                 holidays = _context.Holidays.Where(h => h.UserID == userBase.ID && h.HolDate >= userBase.StartDate && h.HolDate <= userBase.EndDate && h.HolType == HolTypes.H).ToList();
+                 userBase.HolidaysTaken = (float)holidays.Count()/2;
+                usersBase.Add(userBase);
+            }
+            return usersBase;
         }
 
         private int convertToHalfDays(int duration, int type)
