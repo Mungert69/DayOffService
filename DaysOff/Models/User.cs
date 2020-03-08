@@ -23,10 +23,10 @@ namespace DayOff.Models
         [Display(Name = "End Date")]
         public DateTime EndDate { get; set; }
 
-        [Display(Name = "Holidays")]
+        [Display(Name = "Holiday 1/2 days")]
         public int noHolidays { get; set; }
 
-        [Display(Name = "Weekly Days Off")]
+        [Display(Name = "Weekly 1/2 Days Off")]
         public int noHalfDaysOff { get; set; }
 
         [Display(Name = "User Type")]
