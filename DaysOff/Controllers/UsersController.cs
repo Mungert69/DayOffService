@@ -1,9 +1,12 @@
 ﻿using DayOff.Data;
 using DayOff.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static DaysOff.Objects.UserBase;
 
 namespace DaysOff
 {
@@ -15,6 +18,13 @@ namespace DaysOff
         {
             _context = context;
         }
+
+        public List<SelectListItem> UserTypeSelectList => System.Enum.GetValues(typeof(UserTypes)).Cast<UserTypes>().Select(v => new SelectListItem
+        {
+
+            Text = v.ToString(),
+            Value = ((int)v).ToString()
+        }).ToList();
 
         // GET: Users
         public async Task<IActionResult> Index()
@@ -43,6 +53,7 @@ namespace DaysOff
         // GET: Users/Create
         public IActionResult Create()
         {
+            ViewData["UserTypes"] = UserTypeSelectList;
             return View();
         }
 
@@ -51,7 +62,7 @@ namespace DaysOff
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,LastName,FirstName,StartDate,EndDate,noHolidays,noHalfDaysOff")] User user)
+        public async Task<IActionResult> Create([Bind("ID,LastName,FirstName,StartDate,EndDate,noHolidays,noHalfDaysOff,UserType")] User user)
         {
             if (ModelState.IsValid)
             {
@@ -75,6 +86,7 @@ namespace DaysOff
             {
                 return NotFound();
             }
+            ViewData["UserTypes"] = UserTypeSelectList;
             return View(user);
         }
 
@@ -83,7 +95,7 @@ namespace DaysOff
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,LastName,FirstName,StartDate,EndDate,noHolidays,noHalfDaysOff")] User user)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,LastName,FirstName,StartDate,EndDate,noHolidays,noHalfDaysOff,UserType")] User user)
         {
             if (id != user.ID)
             {

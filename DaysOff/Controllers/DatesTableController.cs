@@ -74,7 +74,7 @@ namespace DaysOff.Controllers
         private List<UserBase> getActiveUsers(DateTime startCheck, DateTime endCheck)
         {
             List<UserBase> userQuery = new List<UserBase>();
-            userQuery = _context.Users.Where(u => (startCheck>= u.StartDate && startCheck<=u.EndDate) || (endCheck >= u.StartDate && endCheck <= u.EndDate) ).Select(s => new UserBase(s.ID, s.LastName, s.FirstName, s.StartDate, s.EndDate, (float)s.noHalfDaysOff/2, (float)s.noHolidays/2)).ToList();
+            userQuery = _context.Users.Where(u => (startCheck>= u.StartDate && startCheck<=u.EndDate) || (endCheck >= u.StartDate && endCheck <= u.EndDate) ).Select(s => new UserBase(s.ID, s.LastName, s.FirstName, s.StartDate, s.EndDate, (float)s.noHalfDaysOff/2, (float)s.noHolidays/2, s.UserType)).OrderByDescending(o => o.UserType).ToList();
 
             List<Holiday> holidays;
             List<UserBase> usersBase = new List<UserBase>();

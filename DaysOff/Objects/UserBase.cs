@@ -4,11 +4,12 @@ namespace DaysOff.Objects
 {
     public class UserBase
     {
+        public enum UserTypes
+        {
+            RAP,TLP,Core,Director
+        }
 
-        private float totalHolidays;
-        private float holidaysTaken;
-        private float daysAllowedPerWeek;
-
+       
         public UserBase(int iD, string lastName, string firstName, DateTime startDate, DateTime endDate)
         {
             ID = iD;
@@ -19,7 +20,7 @@ namespace DaysOff.Objects
 
         }
 
-        public UserBase(int iD, string lastName, string firstName, DateTime startDate, DateTime endDate, float daysAllowedPerWeek, float totalHolidays)
+        public UserBase(int iD, string lastName, string firstName, DateTime startDate, DateTime endDate, float daysAllowedPerWeek, float totalHolidays, UserTypes? userType)
         {
             ID = iD;
             LastName = lastName;
@@ -28,6 +29,7 @@ namespace DaysOff.Objects
             EndDate = endDate;
             DaysAllowedPerWeek = daysAllowedPerWeek;
             TotalHolidays = totalHolidays;
+            UserType = userType;
 
         }
 
@@ -38,8 +40,10 @@ namespace DaysOff.Objects
         public string FirstName { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public float TotalHolidays { get => totalHolidays; set => totalHolidays = value; }
-        public float HolidaysTaken { get => holidaysTaken; set => holidaysTaken = value; }
-        public float DaysAllowedPerWeek { get => daysAllowedPerWeek; set => daysAllowedPerWeek = value; }
+        public float TotalHolidays { get ; set; }
+        public float HolidaysTaken { get; set ; }
+        public float DaysAllowedPerWeek { get ; set ; }
+
+        public UserTypes? UserType { get; set; }
     }
 }
