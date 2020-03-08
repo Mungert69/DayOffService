@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static DaysOff.Objects.UserBase;
 
 namespace DaysOff.Controllers
 {
@@ -54,6 +55,23 @@ namespace DaysOff.Controllers
                 selectItem.Label = workBase.WorkNames[Convert.ToInt32(workType)];
                 selectItem.Value = workType.ToString();
                 selectItem.Id = Convert.ToInt32(workType);
+
+                types.Add(selectItem);
+            }
+            return types;
+        }
+
+        private List<SelectItem> getUserTypes()
+        {
+            List<SelectItem> types = new List<SelectItem>();
+            SelectItem selectItem;
+            List<UserTypes> userTypes = Enum.GetValues(typeof(UserTypes)).Cast<UserTypes>().ToList();
+            foreach (UserTypes userType in userTypes)
+            {
+                selectItem = new SelectItem();
+                selectItem.Label = userType.ToString();
+                selectItem.Value = userType.ToString();
+                selectItem.Id = Convert.ToInt32(userType);
 
                 types.Add(selectItem);
             }
@@ -308,6 +326,13 @@ namespace DaysOff.Controllers
         public ActionResult<IEnumerable<SelectItem>> GetWorkTypes()
         {
             return getWorkTypes();
+        }
+
+        // GET api/DatesTable/GetUserTypes
+        [HttpGet("GetUserTypes")]
+        public ActionResult<IEnumerable<SelectItem>> GetUserTypes()
+        {
+            return getUserTypes();
         }
 
         // GET api/DatesTable/ActiveUsers
