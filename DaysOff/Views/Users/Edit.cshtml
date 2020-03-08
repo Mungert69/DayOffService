@@ -34,6 +34,16 @@
                 <span asp-validation-for="EndDate" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="noHolidays" class="control-label"></label>
+                <input asp-for="noHolidays" class="form-control" />
+                <span asp-validation-for="noHolidays" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="noHalfDaysOff" class="control-label"></label>
+                <input asp-for="noHalfDaysOff" class="form-control" />
+                <span asp-validation-for="noHalfDaysOff" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
         </form>

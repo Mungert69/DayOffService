@@ -51,7 +51,7 @@ namespace DaysOff
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,LastName,FirstName,StartDate,EndDate")] User user)
+        public async Task<IActionResult> Create([Bind("ID,LastName,FirstName,StartDate,EndDate,noHolidays,noHalfDaysOff")] User user)
         {
             if (ModelState.IsValid)
             {
@@ -83,7 +83,7 @@ namespace DaysOff
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,LastName,FirstName,StartDate,EndDate")] User user)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,LastName,FirstName,StartDate,EndDate,noHolidays,noHalfDaysOff")] User user)
         {
             if (id != user.ID)
             {
