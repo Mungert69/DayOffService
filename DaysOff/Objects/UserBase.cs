@@ -2,14 +2,16 @@
 
 namespace DaysOff.Objects
 {
-    public class UserBase
+    public class UserBase : IUserBase
     {
         public enum UserTypes
         {
-            RAP,TLP,Core,Director
+            RAP, TLP, Core, Director
         }
 
-       
+        public UserBase() { }
+
+
         public UserBase(int iD, string lastName, string firstName, DateTime startDate, DateTime endDate)
         {
             ID = iD;
@@ -40,9 +42,9 @@ namespace DaysOff.Objects
         public string FirstName { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public float TotalHolidays { get ; set; }
-        public float HolidaysTaken { get; set ; }
-        public float DaysAllowedPerWeek { get ; set ; }
+        public float TotalHolidays { get; set; }
+        public float HolidaysTaken { get; set; }
+        public float DaysAllowedPerWeek { get; set; }
 
         public UserTypes? UserType { get; set; }
     }

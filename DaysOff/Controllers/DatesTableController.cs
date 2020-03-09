@@ -89,19 +89,10 @@ namespace DaysOff.Controllers
         }
 
       
-        private List<UserBase> getActiveUsers(DateTime startCheck, DateTime endCheck)
+        private List<IUserBase> getActiveUsers(DateTime startCheck, DateTime endCheck)
         {
-            List<UserBase> userQuery = new List<UserBase>();
-            userQuery = _context.Users.Where(u => (startCheck>= u.StartDate && startCheck<=u.EndDate) || (endCheck >= u.StartDate && endCheck <= u.EndDate) ).Select(s => new UserBase(s.ID, s.LastName, s.FirstName, s.StartDate, s.EndDate, (float)s.noHalfDaysOff/2, (float)s.noHolidays/2, s.UserType)).OrderByDescending(o => o.UserType).ToList();
-
-            List<Holiday> holidays;
-            List<UserBase> usersBase = new List<UserBase>();
-            foreach (UserBase userBase in userQuery) {
-                 holidays = _context.Holidays.Where(h => h.UserID == userBase.ID && h.HolDate >= userBase.StartDate && h.HolDate <= userBase.EndDate && h.HolType == HolTypes.H).ToList();
-                 userBase.HolidaysTaken = (float)holidays.Count()/2;
-                usersBase.Add(userBase);
-            }
-            return usersBase;
+           
+            return DataBaseHelper.getActiveUsers(startCheck,  endCheck,_context);
         }
 
         private int convertToHalfDays(int duration, int type)
@@ -221,7 +212,7 @@ namespace DaysOff.Controllers
             eventData.EventItems = eventItems;
             eventData.DayCount = eventCountArray;
 
-            List<UserBase> users = getActiveUsers(from,to);
+            List<IUserBase> users = getActiveUsers(from,to);
             foreach (UserBase user in users)
             {
                 userRow = new List<EventBase>();
@@ -306,7 +297,7 @@ namespace DaysOff.Controllers
 
         // GET api/DatesTable/GetUsers
         [HttpGet("GetUsers")]
-        public ActionResult<IEnumerable<UserBase>> GetUsers()
+        public ActionResult<IEnumerable<IUserBase>> GetUsers()
         {
             return getActiveUsers(DateTime.Now.StartOfWeek(DayOfWeek.Monday), DateTime.Now.StartOfWeek(DayOfWeek.Monday).AddDays(6));
         }
@@ -337,7 +328,7 @@ namespace DaysOff.Controllers
 
         // GET api/DatesTable/ActiveUsers
         [HttpGet("ActiveUsers")]
-        public ActionResult<IEnumerable<UserBase>> ActiveUsers()
+        public ActionResult<IEnumerable<IUserBase>> ActiveUsers()
         {
             return getActiveUsers(DateTime.Now,DateTime.Now);
         }
