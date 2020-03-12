@@ -22,10 +22,18 @@ namespace DaysOff.Controllers
 
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly DayOffContext _context;
+        private int rowHC = 3;
+        private int rowDB = 3;
+        private int rowGR = 3;
+        private int rowOJ = 3;
+        private int rowOF = 3;
+        private int rowKI = 3;
+        Dictionary<string, string> workStrings = new Dictionary<string, string>();
         public ExportExcelController(DayOffContext context,IHostingEnvironment hostingEnvironment)
         {
             _context = context;
             _hostingEnvironment = hostingEnvironment;
+
         }
 
         [HttpGet("Export/{checkDateStr}")]
@@ -61,8 +69,8 @@ namespace DaysOff.Controllers
                 worksheet.Cells[2, 3].Value = "  HOUSECARE  ";
                 worksheet.Cells[2, 4].Value = "  DEBOP  ";
                 worksheet.Cells[2, 5].Value = "  GROUNDS  ";
-                worksheet.Cells[2, 6].Value = "PROJECTS PROMO OWN JOBS";
-                worksheet.Cells[2, 6].Style.WrapText = true;
+                worksheet.Cells[2, 6].Value = "OWN JOBS";
+                //worksheet.Cells[2, 6].Style.WrapText = true;
                 worksheet.Cells[2, 7].Value = "  OFFICE  ";
                 worksheet.Cells[2, 8].Value = "  KITCHEN  ";
                 worksheet.Cells["A1:H1"].Style.Border.Top.Style = ExcelBorderStyle.Thick;
@@ -89,13 +97,16 @@ namespace DaysOff.Controllers
                 worksheet.Cells["C19:H19"].Style.Border.Top.Style = ExcelBorderStyle.Thick;
                 worksheet.Cells["A34:H34"].Style.Border.Bottom.Style = ExcelBorderStyle.Thick;
 
-                
-                List<IUserBase> usersBase = DataBaseHelper.getActiveUsers(checkDate,checkDate,_context);
+                List<WorkBase> workBases = DataBaseHelper.getWorkDay(checkDate, checkDate, _context);
+
+               
+                List<IUserBase> usersBases = DataBaseHelper.getActiveUsers(checkDate,checkDate,_context);
                 List<UserRota> users = new List<UserRota>();
-                foreach (UserBase userBase in usersBase)
+                foreach (UserBase userBase in usersBases)
                 {
                     UserRota user = new UserRota();
                     user.FirstName = userBase.FirstName;
+                    user.ID = userBase.ID;
                     int count=_context.Holidays.Where(h => h.UserID == userBase.ID && (h.Duration == 0) && h.HolDate==checkDate).Count();
                     if (count > 0) { user.IsAmOff = true; }
                     else { user.IsAmOff = false; }
@@ -106,9 +117,37 @@ namespace DaysOff.Controllers
                     
                     users.Add(user);
                 }
-                //Add values
+
+                int durationOffset = 16;
+                int startRowAm = 3;
+                int startRowPm = 3+durationOffset;
+                Dictionary<string, int> rowDic = new Dictionary<string, int>();
+                rowDic.Add("rowAmC", startRowAm);
+                rowDic.Add("rowPmC" , startRowPm);
+                rowDic.Add("rowAmD" , startRowAm);
+                rowDic.Add("rowPmD" , startRowPm);
+                rowDic.Add("rowAmE" , startRowAm);
+                rowDic.Add("rowPmE" , startRowPm);
+                rowDic.Add("rowAmF" , startRowAm);
+                rowDic.Add("rowPmF" ,startRowPm);
+                rowDic.Add("rowAmG" ,startRowAm);
+                rowDic.Add("rowPmG" ,startRowPm);
+                rowDic.Add("rowAmH" , startRowAm);
+                rowDic.Add("rowPmH" , startRowPm);
+
+                string cellLoc = "";
+                string keyString = "";
+                foreach (WorkBase workBase in workBases)
+                {
+                    keyString = "row" + workBase.DurationString() + workBase.ExcelCol();
+                    cellLoc = workBase.ExcelCol() + rowDic[keyString].ToString();
+                    rowDic[keyString] = rowDic[keyString] + 1;
+                    worksheet.Cells[cellLoc].Value =workBase.UserName;
+                }
+
+                //Add day off on
                 int col = 1;
-                int rowStart = 3;
+                int rowStart = startRowAm;
                 int rowLeft = rowStart;
                 int rowRight = rowStart;
                 foreach (UserRota user in users) {
@@ -147,6 +186,8 @@ namespace DaysOff.Controllers
 
                   
                 }
+
+
 
                 worksheet.Cells.AutoFitColumns(0);
 

@@ -10,7 +10,23 @@ namespace DaysOff.Utils
     public class DataBaseHelper
     {
 
-       
+
+        public static List<WorkBase> getWorkDay(DateTime startCheck, DateTime endCheck, DayOff.Data.DayOffContext context)
+        {
+            List<IUserBase> userQuery = getActiveUsers(startCheck,endCheck,context);
+            List<WorkDay> workQuery = new List<WorkDay>();
+            WorkBase workBase;
+            List<WorkBase> workBases = new List<WorkBase>();
+            string userName;
+            workQuery = context.WorkDays.Where(u =>  u.WorkDate >= startCheck   && u.WorkDate<=endCheck ).ToList();
+            foreach (WorkDay workDay in workQuery) {
+                userName=userQuery.Where(u => u.ID == workDay.UserID).Select(s => s.FirstName).FirstOrDefault();
+                workBase = new WorkBase(workDay.WorkID, workDay.WorkType, workDay.Duration, workDay.WorkDate, workDay.UserID,userName);
+                workBases.Add(workBase);
+            }
+
+            return workBases;
+        }
         public static List<IUserBase> getActiveUsers(DateTime startCheck, DateTime endCheck, DayOff.Data.DayOffContext context)
         {
             List<UserBase> userQuery = new List<UserBase>();
