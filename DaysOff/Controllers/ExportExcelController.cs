@@ -137,12 +137,15 @@ namespace DaysOff.Controllers
 
                 string cellLoc = "";
                 string keyString = "";
+                string valueString = "";
                 foreach (WorkBase workBase in workBases)
                 {
                     keyString = "row" + workBase.DurationString() + workBase.ExcelCol();
                     cellLoc = workBase.ExcelCol() + rowDic[keyString].ToString();
                     rowDic[keyString] = rowDic[keyString] + 1;
-                    worksheet.Cells[cellLoc].Value =workBase.UserName;
+                    if (workBase.ExcelCol() == "F") { valueString = workBase.UserName + " - " + workBase.WorkType.ToString(); }
+                    else { valueString = workBase.UserName; }
+                    worksheet.Cells[cellLoc].Value =valueString;
                 }
 
                 //Add day off on
