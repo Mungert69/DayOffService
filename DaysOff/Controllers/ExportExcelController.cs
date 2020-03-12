@@ -144,7 +144,7 @@ namespace DaysOff.Controllers
                     cellLoc = workBase.ExcelCol() + rowDic[keyString].ToString();
                     rowDic[keyString] = rowDic[keyString] + 1;
                     valueString = workBase.UserName;
-                    if (workBase.ExcelCol() == "F" || workBase.WorkType == 0) { valueString = workBase.UserName + " - " + workBase.WorkType.ToString(); }
+                    if (workBase.ExcelCol() == "F" || workBase.WorkType == 0 || workBase.WorkType == (WorkTypes)2) { valueString = workBase.UserName + " - " + workBase.WorkType.ToString(); }
                     worksheet.Cells[cellLoc].Value =valueString;
                 }
 
