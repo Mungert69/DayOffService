@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
+using Spire.Pdf;
 
 namespace DaysOff.Controllers
 {
@@ -22,12 +23,7 @@ namespace DaysOff.Controllers
 
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly DayOffContext _context;
-        private int rowHC = 3;
-        private int rowDB = 3;
-        private int rowGR = 3;
-        private int rowOJ = 3;
-        private int rowOF = 3;
-        private int rowKI = 3;
+        
         Dictionary<string, string> workStrings = new Dictionary<string, string>();
         public ExportExcelController(DayOffContext context,IHostingEnvironment hostingEnvironment)
         {
@@ -189,7 +185,11 @@ namespace DaysOff.Controllers
 
                   
                 }
+                // Quick fix
+                if (rowLeft == rowStart) {
+                    worksheet.Cells[rowLeft, 1].Value = "___________";
 
+                }
 
 
                 worksheet.Cells.AutoFitColumns(0);
@@ -200,7 +200,12 @@ namespace DaysOff.Controllers
                 package.Save(); //Save the workbook.
             }
             var result = PhysicalFile(Path.Combine(sWebRootFolder, sFileName), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
+            /*PdfDocument pdfdocument = new PdfDocument();
+            pdfdocument.LoadFromFile("C:\\temp\\test.pdf");
+            pdfdocument.PrintSettings.PrinterName = "Xerox VersaLink C405 (64:92:59)";
+            pdfdocument.PrintSettings.Copies = 1;
+            pdfdocument.Print();
+            pdfdocument.Dispose();*/
             Response.Headers["Content-Disposition"] = new ContentDispositionHeaderValue("attachment")
             {
                 FileName = file.Name
