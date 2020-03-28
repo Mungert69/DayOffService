@@ -55,17 +55,17 @@ namespace DaysOff.Controllers
                 // add a new worksheet to the empty workbook
                 ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Rota");
 
-                worksheet.Column(1).Width = 15;
-                worksheet.Column(2).Width = 15;
-                worksheet.Column(3).Width = 15;
-                worksheet.Column(4).Width = 15;
-                worksheet.Column(5).Width = 15;
-                worksheet.Column(6).Width = 15;
+                worksheet.Column(1).Width = 16;
+                worksheet.Column(2).Width = 16;
+                worksheet.Column(3).Width = 16;
+                worksheet.Column(4).Width = 16;
+                worksheet.Column(5).Width = 16;
+                worksheet.Column(6).Width = 16;
                 worksheet.Column(7).Width = 15;
                 worksheet.Column(8).Width = 15;
 
                 //First add the headers
-                worksheet.Cells[1, 1].Value = checkDate.DayOfWeek;
+                worksheet.Cells[1, 1].Value = "  "+checkDate.DayOfWeek;
                 worksheet.Cells[1, 2].Value = checkDate.ToShortDateString();
 
                 worksheet.Cells[1, 3].Value = " OVER ROTA";
