@@ -5,7 +5,7 @@ namespace DaysOff.Objects
 {
     public enum HolTypes
     {
-        D=1, H=0, X=2, G=3
+        D=1, H=0, X=2, G=3, O=4
     }
 
     
@@ -19,6 +19,7 @@ namespace DaysOff.Objects
             HolNames.Add("Time Off");
             HolNames.Add("Away");
             HolNames.Add("Group");
+            HolNames.Add("Override");
 
         }
 

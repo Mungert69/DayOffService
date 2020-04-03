@@ -59,7 +59,7 @@ namespace DaysOff.Controllers
                 worksheet.Column(2).Width = 16;
                 worksheet.Column(3).Width = 16;
                 worksheet.Column(4).Width = 16;
-                worksheet.Column(5).Width = 16;
+                worksheet.Column(5).Width = 15;
                 worksheet.Column(6).Width = 16;
                 worksheet.Column(7).Width = 15;
                 worksheet.Column(8).Width = 15;
