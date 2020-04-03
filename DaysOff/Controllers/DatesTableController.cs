@@ -122,6 +122,7 @@ namespace DaysOff.Controllers
         private bool staffCountOk(DateTime holDate, int type, int duration)
         {
 
+            if (type == 4) return false;
             List<Holiday> holidays = _context.Holidays.Where(h => h.HolDate == holDate && h.Duration == (Durations)duration).ToList();
 
            
@@ -133,6 +134,8 @@ namespace DaysOff.Controllers
         }
         private bool countHolidaysOk(DateTime holDate, int userId, int duration, int type)
         {
+            // type 4 is override so no checking for staff days off
+
             User user = _context.Users.Where(u => u.ID == userId).FirstOrDefault();
             DateTime startDate = user.StartDate;
             DateTime endDate = user.EndDate;
