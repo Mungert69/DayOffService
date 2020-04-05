@@ -33,7 +33,7 @@ namespace DayOff
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
 
 
-        WebHost.CreateDefaultBuilder(args).UseUrls("http://192.168.1.22:10202/")
+        WebHost.CreateDefaultBuilder(args).UseUrls("http://192.168.1.20:10202/")
                 .UseStartup<Startup>();
 
     }

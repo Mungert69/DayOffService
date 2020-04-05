@@ -1,4 +1,5 @@
 ﻿using DayOff.Models;
+using DaysOff.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DayOff.Data
@@ -15,11 +16,14 @@ namespace DayOff.Data
 
         public DbSet<WorkDay> WorkDays { get; set; }
 
+        public DbSet<DishDay> DishDays { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>().ToTable("Users");
             modelBuilder.Entity<Holiday>().ToTable("Holidays");
             modelBuilder.Entity<WorkDay>().ToTable("WorkDays");
+            modelBuilder.Entity<DishDay>().ToTable("DishDays");
         }
 
 
