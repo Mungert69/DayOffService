@@ -1,0 +1,4 @@
+﻿ add-migration DayOffTestContext -Context DayOffContext
+ update-database -Context DayOffContext
+ remove-migration -Context DayOffContext
+ migrations add AddRotaDays

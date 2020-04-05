@@ -8,7 +8,7 @@ namespace DaysOff.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-           /* migrationBuilder.CreateTable(
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -27,7 +27,7 @@ namespace DaysOff.Migrations
                     table.PrimaryKey("PK_Users", x => x.ID);
                 });
 
-    */
+    
             migrationBuilder.CreateTable(
                 name: "DishDays",
                 columns: table => new
@@ -47,7 +47,7 @@ namespace DaysOff.Migrations
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
-            /*
+            
             migrationBuilder.CreateTable(
                 name: "Holidays",
                 columns: table => new
@@ -91,13 +91,13 @@ namespace DaysOff.Migrations
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
-                */
+                
             migrationBuilder.CreateIndex(
                 name: "IX_DishDays_UserID",
                 table: "DishDays",
                 column: "UserID");
 
-            /*
+            
             migrationBuilder.CreateIndex(
                 name: "IX_Holidays_UserID",
                 table: "Holidays",
@@ -107,7 +107,7 @@ namespace DaysOff.Migrations
                 name: "IX_WorkDays_UserID",
                 table: "WorkDays",
                 column: "UserID");
-                */
+                
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

@@ -4,14 +4,16 @@ using DayOff.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DaysOff.Migrations
 {
     [DbContext(typeof(DayOffContext))]
-    partial class DayOffContextModelSnapshot : ModelSnapshot
+    [Migration("20200405193205_AddRotaDays")]
+    partial class AddRotaDays
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
