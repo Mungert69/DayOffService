@@ -34,7 +34,7 @@ namespace DaysOff.Controllers
         public async Task<IActionResult> Index()
         {
             RotaDay rotaDay = new RotaDay();
-            rotaDay.RotaDate = DateTime.Now.AddDays(1);
+            rotaDay.RotaDate = DateTime.Now.AddDays(1).Date;
             return View(rotaDay);
         }
 
@@ -54,7 +54,7 @@ namespace DaysOff.Controllers
 
         public IActionResult Export(RotaDay rotaDay)
         {
-            DateTime checkDate = rotaDay.RotaDate;
+            DateTime checkDate = rotaDay.RotaDate.Date;
 
 
             string sWebRootFolder = _hostingEnvironment.ContentRootPath;
