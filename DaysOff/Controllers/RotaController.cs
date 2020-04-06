@@ -71,14 +71,14 @@ namespace DaysOff.Controllers
                 // add a new worksheet to the empty workbook
                 ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Rota");
 
-                worksheet.Column(1).Width = 16;
-                worksheet.Column(2).Width = 16;
-                worksheet.Column(3).Width = 16;
-                worksheet.Column(4).Width = 16;
-                worksheet.Column(5).Width = 15;
-                worksheet.Column(6).Width = 16;
-                worksheet.Column(7).Width = 15;
-                worksheet.Column(8).Width = 15;
+                worksheet.Column(1).Width = 17;
+                worksheet.Column(2).Width = 17;
+                worksheet.Column(3).Width = 17;
+                worksheet.Column(4).Width = 17;
+                worksheet.Column(5).Width = 17;
+                worksheet.Column(6).Width = 17;
+                worksheet.Column(7).Width = 17;
+                worksheet.Column(8).Width = 17;
 
                 //First add the headers
                 worksheet.Cells[1, 1].Value = "  " + checkDate.DayOfWeek;
@@ -95,29 +95,29 @@ namespace DaysOff.Controllers
                 //worksheet.Cells[2, 6].Style.WrapText = true;
                 worksheet.Cells[2, 7].Value = "  OFFICE  ";
                 worksheet.Cells[2, 8].Value = "  KITCHEN  ";
-                worksheet.Cells["A1:H1"].Style.Border.Top.Style = ExcelBorderStyle.Thick;
-                worksheet.Cells["A1:H1"].Style.Border.Bottom.Style = ExcelBorderStyle.Thick;
+                worksheet.Cells["A1:H1"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells["A1:H1"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
 
-                worksheet.Cells["A2:H2"].Style.Border.Bottom.Style = ExcelBorderStyle.Thick;
+                worksheet.Cells["A2:H2"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
                 worksheet.Cells["A2:H2"].Style.Font.Bold = true;
                 worksheet.Cells["A1:H1"].Style.Font.Bold = true;
                 worksheet.Cells["A2:H2"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                 worksheet.Cells["A2:H2"].Style.Font.Size = 14;
                 worksheet.Cells["A1:H1"].Style.Font.Size = 14;
 
-                worksheet.Cells["A1:A34"].Style.Border.Left.Style = ExcelBorderStyle.Thick;
+                worksheet.Cells["A1:A34"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
 
-                worksheet.Cells["A2:A34"].Style.Border.Right.Style = ExcelBorderStyle.Thick;
-                worksheet.Cells["B1:B34"].Style.Border.Right.Style = ExcelBorderStyle.Thick;
-                worksheet.Cells["C2:C34"].Style.Border.Right.Style = ExcelBorderStyle.Thick;
-                worksheet.Cells["D2:D34"].Style.Border.Right.Style = ExcelBorderStyle.Thick;
-                worksheet.Cells["E1:E34"].Style.Border.Right.Style = ExcelBorderStyle.Thick;
-                worksheet.Cells["F2:F34"].Style.Border.Right.Style = ExcelBorderStyle.Thick;
-                worksheet.Cells["G2:G34"].Style.Border.Right.Style = ExcelBorderStyle.Thick;
-                worksheet.Cells["H1:H34"].Style.Border.Right.Style = ExcelBorderStyle.Thick;
+                worksheet.Cells["A2:A34"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells["B1:B34"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells["C2:C34"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells["D2:D34"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells["E1:E34"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells["F2:F34"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells["G2:G34"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells["H1:H34"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
 
-                worksheet.Cells["C19:H19"].Style.Border.Top.Style = ExcelBorderStyle.Thick;
-                worksheet.Cells["A34:H34"].Style.Border.Bottom.Style = ExcelBorderStyle.Thick;
+                worksheet.Cells["C19:H19"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells["A34:H34"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
 
                 List<WorkBase> workBases = DataBaseHelper.getWorkDay(checkDate, checkDate, _context);
 
@@ -224,9 +224,14 @@ namespace DaysOff.Controllers
 
 
 
-                worksheet.View.PageLayoutView = true;
+                worksheet.PrinterSettings.FitToPage = true;
+                worksheet.PrinterSettings.FitToHeight = 1;
                 worksheet.PrinterSettings.Orientation = eOrientation.Landscape;
-
+                worksheet.PrinterSettings.FooterMargin = 0.5M;
+                worksheet.PrinterSettings.TopMargin = .5M;
+                worksheet.PrinterSettings.LeftMargin = .5M;
+                worksheet.PrinterSettings.RightMargin = .5M;
+                worksheet.PrinterSettings.PaperSize = ePaperSize.A4;
                 package.Save(); //Save the workbook.
             }
             var result = PhysicalFile(Path.Combine(sWebRootFolder, sFileName), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
