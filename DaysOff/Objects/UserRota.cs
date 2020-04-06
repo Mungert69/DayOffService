@@ -9,6 +9,10 @@ namespace DaysOff.Objects
     {
         private bool isAmOff;
         private bool isPmOff;
+        private WorkTypes? amWorkType;
+        private WorkTypes? pmWorkType;
+        private int dishCount;
+
 
         public bool IsAmOff { get => isAmOff; set => isAmOff = value; }
         public bool IsPmOff { get => isPmOff; set => isPmOff = value; }
@@ -21,7 +25,8 @@ namespace DaysOff.Objects
         public DateTime StartDate { get; set; }
         public float TotalHolidays { get; set; }
         public UserBase.UserTypes? UserType { get; set; }
-
-        
+        public WorkTypes? AmWorkType { get => amWorkType; set => amWorkType = value; }
+        public WorkTypes? PmWorkType { get => pmWorkType; set => pmWorkType = value; }
+        public int DishCount { get => dishCount; set => dishCount = value; }
     }
 }

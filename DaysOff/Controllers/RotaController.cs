@@ -50,15 +50,17 @@ namespace DaysOff.Controllers
             return result;
         }
 
-
+        
 
         public IActionResult Export(RotaDay rotaDay)
         {
             DateTime checkDate = rotaDay.RotaDate.Date;
-
+            RotaCreator rotaCreator = new RotaCreator(_context);
+            rotaCreator.init(checkDate);
+            string dishesSupervisors=rotaCreator.getDishesSupervisors(checkDate);
 
             string sWebRootFolder = _hostingEnvironment.ContentRootPath;
-            string sFileName = @"demo.xlsx";
+            string sFileName = @"Rota-"+DateTime.Now.ToLongDateString()+".xlsx";
             string URL = string.Format("{0}://{1}/{2}", Request.Scheme, Request.Host, sFileName);
             FileInfo file = new FileInfo(Path.Combine(sWebRootFolder, sFileName));
             if (file.Exists)
@@ -82,7 +84,7 @@ namespace DaysOff.Controllers
 
                 //First add the headers
                 worksheet.Cells[1, 1].Value = "  " + checkDate.DayOfWeek;
-                worksheet.Cells[1, 2].Value = checkDate.ToShortDateString();
+                worksheet.Cells[1, 2].Value = checkDate.ToLongDateString();
 
                 worksheet.Cells[1, 3].Value = " OVER ROTA";
                 worksheet.Cells[1, 6].Value = " LOCK UP";
@@ -92,7 +94,6 @@ namespace DaysOff.Controllers
                 worksheet.Cells[2, 4].Value = "  DEBOP  ";
                 worksheet.Cells[2, 5].Value = "  GROUNDS  ";
                 worksheet.Cells[2, 6].Value = "OWN JOBS";
-                //worksheet.Cells[2, 6].Style.WrapText = true;
                 worksheet.Cells[2, 7].Value = "  OFFICE  ";
                 worksheet.Cells[2, 8].Value = "  KITCHEN  ";
                 worksheet.Cells["A1:H1"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
@@ -118,27 +119,9 @@ namespace DaysOff.Controllers
 
                 worksheet.Cells["C19:H19"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
                 worksheet.Cells["A34:H34"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells["A35"].Value = "Dishes ";
+                worksheet.Cells["B35"].Value = dishesSupervisors;
 
-                List<WorkBase> workBases = DataBaseHelper.getWorkDay(checkDate, checkDate, _context);
-
-
-                List<IUserBase> usersBases = DataBaseHelper.getActiveUsers(checkDate, checkDate, _context);
-                List<UserRota> users = new List<UserRota>();
-                foreach (UserBase userBase in usersBases)
-                {
-                    UserRota user = new UserRota();
-                    user.FirstName = userBase.FirstName;
-                    user.ID = userBase.ID;
-                    int count = _context.Holidays.Where(h => h.UserID == userBase.ID && (h.Duration == 0) && h.HolDate == checkDate).Count();
-                    if (count > 0) { user.IsAmOff = true; }
-                    else { user.IsAmOff = false; }
-                    count = _context.Holidays.Where(h => h.UserID == userBase.ID && h.Duration == (Durations)1 && h.HolDate == checkDate).Count();
-                    if (count > 0) { user.IsPmOff = true; }
-                    else { user.IsPmOff = false; }
-
-
-                    users.Add(user);
-                }
 
                 int durationOffset = 16;
                 int startRowAm = 3;
@@ -160,7 +143,7 @@ namespace DaysOff.Controllers
                 string cellLoc = "";
                 string keyString = "";
                 string valueString = "";
-                foreach (WorkBase workBase in workBases)
+                foreach (WorkBase workBase in rotaCreator.WorkBases)
                 {
                     keyString = "row" + workBase.DurationString() + workBase.ExcelCol();
                     cellLoc = workBase.ExcelCol() + rowDic[keyString].ToString();
@@ -175,7 +158,7 @@ namespace DaysOff.Controllers
                 int rowStart = startRowAm;
                 int rowLeft = rowStart;
                 int rowRight = rowStart;
-                foreach (UserRota user in users)
+                foreach (UserRota user in rotaCreator.Users)
                 {
                     if (user.IsAmOff && user.IsPmOff)
                     {
@@ -214,14 +197,7 @@ namespace DaysOff.Controllers
 
 
                 }
-                // Quick fix
-                if (rowLeft == rowStart)
-                {
-                    worksheet.Cells[rowLeft, 1].Value = "___________";
-
-                }
-
-
+              
 
 
                 worksheet.PrinterSettings.FitToPage = true;

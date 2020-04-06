@@ -38,6 +38,7 @@ namespace DaysOff.Utils
             {
                 holidays = context.Holidays.Where(h => h.UserID == userBase.ID && h.HolDate >= userBase.StartDate && h.HolDate <= userBase.EndDate && h.HolType == HolTypes.H).ToList();
                 userBase.HolidaysTaken = (float)holidays.Count() / 2;
+
                 usersBase.Add(userBase);
             }
             return usersBase;

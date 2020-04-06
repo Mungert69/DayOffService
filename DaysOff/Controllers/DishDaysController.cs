@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DayOff.Data;
 using DaysOff.Models;
+using DayOff.Models;
 
 namespace DaysOff.Controllers
 {
