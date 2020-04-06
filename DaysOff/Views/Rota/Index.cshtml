@@ -1,0 +1,19 @@
+﻿@model DaysOff.Models.RotaDay
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<form asp-action="Print">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-group">
+        <label asp-for="RotaDate" class="control-label"></label>
+        <input asp-for="RotaDate" class="form-control" />
+        <span asp-validation-for="RotaDate" class="text-danger"></span>
+
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Print Rota" class="btn btn-primary" />
+    </div>
+</form>

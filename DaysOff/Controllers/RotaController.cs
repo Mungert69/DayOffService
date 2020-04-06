@@ -1,46 +1,62 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using DayOff.Data;
-using DaysOff.Objects;
-using DaysOff.Utils;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using DayOff.Data;
+using DaysOff.Models;
+using Microsoft.AspNetCore.Hosting;
+using DaysOff.Objects;
+using System.Net.Http.Headers;
 using OfficeOpenXml;
+using System.IO;
 using OfficeOpenXml.Style;
-using Spire.Pdf;
+using DaysOff.Utils;
 
 namespace DaysOff.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ExportExcelController : ControllerBase
+    public class RotaController : Controller
     {
 
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly DayOffContext _context;
-        
-        Dictionary<string, string> workStrings = new Dictionary<string, string>();
-        public ExportExcelController(DayOffContext context,IHostingEnvironment hostingEnvironment)
+
+        public RotaController(DayOffContext context, IHostingEnvironment hostingEnvironment)
         {
             _context = context;
             _hostingEnvironment = hostingEnvironment;
 
         }
 
-        [HttpGet("Export/{checkDateStr}")]
-        public IActionResult Export([FromRoute] string checkDateStr)
+        // GET: RotaDays
+        public async Task<IActionResult> Index()
         {
-            DateTime checkDate;
-            try { checkDate= DateTime.Parse(checkDateStr).Date; }
-            catch (Exception e) {
-                checkDate = DateTime.Now.Date;
-            }
-            
+            RotaDay rotaDay = new RotaDay();
+            rotaDay.RotaDate = DateTime.Now.AddDays(1);
+            return View(rotaDay);
+        }
+
+        // POST: RotaDays/Print/03-02-2020
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Print([Bind("RotaID,UserID,RotaDate")] RotaDay rotaDay)
+        {
+
+            var result = Export(rotaDay);
+            return result;
+        }
+
+
+
+        public IActionResult Export(RotaDay rotaDay)
+        {
+            DateTime checkDate = rotaDay.RotaDate;
+
+
             string sWebRootFolder = _hostingEnvironment.ContentRootPath;
             string sFileName = @"demo.xlsx";
             string URL = string.Format("{0}://{1}/{2}", Request.Scheme, Request.Host, sFileName);
@@ -65,7 +81,7 @@ namespace DaysOff.Controllers
                 worksheet.Column(8).Width = 15;
 
                 //First add the headers
-                worksheet.Cells[1, 1].Value = "  "+checkDate.DayOfWeek;
+                worksheet.Cells[1, 1].Value = "  " + checkDate.DayOfWeek;
                 worksheet.Cells[1, 2].Value = checkDate.ToShortDateString();
 
                 worksheet.Cells[1, 3].Value = " OVER ROTA";
@@ -105,41 +121,41 @@ namespace DaysOff.Controllers
 
                 List<WorkBase> workBases = DataBaseHelper.getWorkDay(checkDate, checkDate, _context);
 
-               
-                List<IUserBase> usersBases = DataBaseHelper.getActiveUsers(checkDate,checkDate,_context);
+
+                List<IUserBase> usersBases = DataBaseHelper.getActiveUsers(checkDate, checkDate, _context);
                 List<UserRota> users = new List<UserRota>();
                 foreach (UserBase userBase in usersBases)
                 {
                     UserRota user = new UserRota();
                     user.FirstName = userBase.FirstName;
                     user.ID = userBase.ID;
-                    int count=_context.Holidays.Where(h => h.UserID == userBase.ID && (h.Duration == 0) && h.HolDate==checkDate).Count();
+                    int count = _context.Holidays.Where(h => h.UserID == userBase.ID && (h.Duration == 0) && h.HolDate == checkDate).Count();
                     if (count > 0) { user.IsAmOff = true; }
                     else { user.IsAmOff = false; }
                     count = _context.Holidays.Where(h => h.UserID == userBase.ID && h.Duration == (Durations)1 && h.HolDate == checkDate).Count();
                     if (count > 0) { user.IsPmOff = true; }
                     else { user.IsPmOff = false; }
-                    
-                    
+
+
                     users.Add(user);
                 }
 
                 int durationOffset = 16;
                 int startRowAm = 3;
-                int startRowPm = 3+durationOffset;
+                int startRowPm = 3 + durationOffset;
                 Dictionary<string, int> rowDic = new Dictionary<string, int>();
                 rowDic.Add("rowAmC", startRowAm);
-                rowDic.Add("rowPmC" , startRowPm);
-                rowDic.Add("rowAmD" , startRowAm);
-                rowDic.Add("rowPmD" , startRowPm);
-                rowDic.Add("rowAmE" , startRowAm);
-                rowDic.Add("rowPmE" , startRowPm);
-                rowDic.Add("rowAmF" , startRowAm);
-                rowDic.Add("rowPmF" ,startRowPm);
-                rowDic.Add("rowAmG" ,startRowAm);
-                rowDic.Add("rowPmG" ,startRowPm);
-                rowDic.Add("rowAmH" , startRowAm);
-                rowDic.Add("rowPmH" , startRowPm);
+                rowDic.Add("rowPmC", startRowPm);
+                rowDic.Add("rowAmD", startRowAm);
+                rowDic.Add("rowPmD", startRowPm);
+                rowDic.Add("rowAmE", startRowAm);
+                rowDic.Add("rowPmE", startRowPm);
+                rowDic.Add("rowAmF", startRowAm);
+                rowDic.Add("rowPmF", startRowPm);
+                rowDic.Add("rowAmG", startRowAm);
+                rowDic.Add("rowPmG", startRowPm);
+                rowDic.Add("rowAmH", startRowAm);
+                rowDic.Add("rowPmH", startRowPm);
 
                 string cellLoc = "";
                 string keyString = "";
@@ -151,7 +167,7 @@ namespace DaysOff.Controllers
                     rowDic[keyString] = rowDic[keyString] + 1;
                     valueString = workBase.UserName;
                     if (workBase.ExcelCol() == "F" || workBase.WorkType == 0 || workBase.WorkType == (WorkTypes)2) { valueString = workBase.UserName + " - " + workBase.WorkType.ToString(); }
-                    worksheet.Cells[cellLoc].Value =valueString;
+                    worksheet.Cells[cellLoc].Value = valueString;
                 }
 
                 //Add day off on
@@ -159,12 +175,14 @@ namespace DaysOff.Controllers
                 int rowStart = startRowAm;
                 int rowLeft = rowStart;
                 int rowRight = rowStart;
-                foreach (UserRota user in users) {
-                    if (user.IsAmOff && user.IsPmOff) {
+                foreach (UserRota user in users)
+                {
+                    if (user.IsAmOff && user.IsPmOff)
+                    {
                         col = 1;
                         worksheet.Cells[rowLeft, col].Value = user.FirstName;
                         rowLeft++;
-                        continue ;
+                        continue;
                     }
 
                     if (!user.IsAmOff && !user.IsPmOff)
@@ -178,31 +196,33 @@ namespace DaysOff.Controllers
                     if (user.IsAmOff)
                     {
                         col = 1;
-                        worksheet.Cells[rowLeft, col].Value = user.FirstName+ " AM";
+                        worksheet.Cells[rowLeft, col].Value = user.FirstName + " AM";
                         rowLeft++;
                         col = 2;
                         worksheet.Cells[rowRight, col].Value = user.FirstName + " PM";
                         rowRight++;
                     }
-                    if (user.IsPmOff) {
+                    if (user.IsPmOff)
+                    {
                         col = 1;
-                        worksheet.Cells[rowLeft, col].Value = user.FirstName+ " PM";
+                        worksheet.Cells[rowLeft, col].Value = user.FirstName + " PM";
                         rowLeft++;
                         col = 2;
-                         worksheet.Cells[rowRight, col].Value = user.FirstName + " AM";
+                        worksheet.Cells[rowRight, col].Value = user.FirstName + " AM";
                         rowRight++;
                     }
 
-                  
+
                 }
                 // Quick fix
-                if (rowLeft == rowStart) {
+                if (rowLeft == rowStart)
+                {
                     worksheet.Cells[rowLeft, 1].Value = "___________";
 
                 }
 
 
-              
+
 
                 worksheet.View.PageLayoutView = true;
                 worksheet.PrinterSettings.Orientation = eOrientation.Landscape;
@@ -223,7 +243,6 @@ namespace DaysOff.Controllers
 
             return result;
         }
-
     }
-
+    
 }

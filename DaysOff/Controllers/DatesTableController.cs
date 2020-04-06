@@ -152,7 +152,7 @@ namespace DaysOff.Controllers
         {
             DateTime startDate = holDate.StartOfWeek(DayOfWeek.Monday);
             DateTime endDate = startDate.AddDays(6);
-            List<Holiday> holidays = _context.Holidays.Where(h => h.UserID == userId && h.HolDate >= startDate && h.HolDate <= endDate).ToList();
+            List<Holiday> holidays = _context.Holidays.Where(h => h.UserID == userId && h.HolDate >= startDate && h.HolDate <= endDate && h.HolType == HolTypes.D).ToList();
             int halfDays = 0;
             foreach (Holiday hol in holidays)
             {
