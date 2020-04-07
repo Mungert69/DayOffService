@@ -27,20 +27,41 @@ namespace DaysOff.Objects
             DayOff.Models.DishDay dishDay ;
             
           
-            string result = "";
+
+            List<DayOff.Models.DishDay> dishDays = _context.DishDays.Where(d => d.DishDate == dishDate).ToList();
+            _context.RemoveRange(dishDays);
+            _context.SaveChanges();
+
             List<UserRota> dishRotas = new List<UserRota>();
             UserRota dishRota;
             foreach (UserRota user in users.Where(u => u.UserType == UserBase.UserTypes.TLP).ToList()) {
                 dishRota = user;
-                dishRota.DishCount= _context.DishDays.Where(d => d.UserID == user.ID ).Count();
-                dishRotas.Add(dishRota);
+                dishRota.DishCount= _context.DishDays.Where(d => d.UserID == user.ID && d.DishDate>dishDate.AddDays(-14)).Count();
+                try
+                {
+                    List<DishDay> countDishes = _context.DishDays.Where(d => d.UserID == user.ID).OrderByDescending(d => d.DishDate).ToList();
+
+                    dishRota.LastDishDate = countDishes[0].DishDate;
+                    try {
+                        dishRota.LastButOneDishDate = countDishes[1].DishDate;
+                    }
+                    catch (Exception e)
+                    {
+                        // just continue as this user has not done the dishes twice
+                    }
+
+                    
+                }
+                catch (Exception e)
+                {
+                    // just continue as this user has not done the dishes before
+                }
+                    dishRotas.Add(dishRota);
             }
 
-            List<UserRota> sortedList= dishRotas.OrderBy(d => d.DishCount).ToList();
+            List<UserRota> sortedList= dishRotas.OrderBy(d => d.LastDishDate).ThenBy(d => d.LastButOneDishDate).ThenBy(d => d.DishCount).ThenByDescending(d => d.ID).ToList();
             
-            List<DayOff.Models.DishDay> dishDays = _context.DishDays.Where(d => d.DishDate == dishDate).ToList();
-            _context.RemoveRange(dishDays);
-            _context.SaveChanges();
+
 
             string amResult = "AM : ";
             string pmResult = "PM : ";

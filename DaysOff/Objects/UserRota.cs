@@ -12,6 +12,8 @@ namespace DaysOff.Objects
         private WorkTypes? amWorkType;
         private WorkTypes? pmWorkType;
         private int dishCount;
+        private DateTime lastDishDate;
+        private DateTime lastButOneDishDate;
 
 
         public bool IsAmOff { get => isAmOff; set => isAmOff = value; }
@@ -28,5 +30,7 @@ namespace DaysOff.Objects
         public WorkTypes? AmWorkType { get => amWorkType; set => amWorkType = value; }
         public WorkTypes? PmWorkType { get => pmWorkType; set => pmWorkType = value; }
         public int DishCount { get => dishCount; set => dishCount = value; }
+        public DateTime LastDishDate { get => lastDishDate; set => lastDishDate = value; }
+        public DateTime LastButOneDishDate{ get => lastButOneDishDate; set => lastButOneDishDate = value; }
     }
 }
