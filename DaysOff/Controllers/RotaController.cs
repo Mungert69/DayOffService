@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DayOff.Data;
-using DaysOff.Models;
+using DayOff.Models;
 using Microsoft.AspNetCore.Hosting;
 using DaysOff.Objects;
 using System.Net.Http.Headers;
@@ -58,6 +58,7 @@ namespace DaysOff.Controllers
             RotaCreator rotaCreator = new RotaCreator(_context);
             rotaCreator.init(checkDate);
             string dishesSupervisors=rotaCreator.getDishesSupervisors(checkDate);
+            string rotaMeetingUsers = rotaCreator.getRotaMeetingUsers(checkDate);
 
             string sWebRootFolder = _hostingEnvironment.ContentRootPath;
             string sFileName = @"Rota-"+DateTime.Now.ToLongDateString()+".xlsx";
@@ -121,6 +122,8 @@ namespace DaysOff.Controllers
                 worksheet.Cells["A34:H34"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
                 worksheet.Cells["A35"].Value = "Dishes ";
                 worksheet.Cells["B35"].Value = dishesSupervisors;
+                worksheet.Cells["E35"].Value = "Rota ";
+                worksheet.Cells["F35"].Value = rotaMeetingUsers;
 
 
                 int durationOffset = 16;

@@ -5,9 +5,9 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DaysOff.Models
+namespace DayOff.Models
 {
-    public class RotaDay
+    public class RotaDay 
     {
         [Key]
         public int RotaID { get; set; }
