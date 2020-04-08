@@ -80,19 +80,37 @@ namespace DaysOff.Objects
             RotaDay rotaDay;
             string result = "";
             int count = 3;
+
+            // First add OHC morning user
             foreach (UserRota user in sortedList)
             {
+                if (!user.IsAmOff && user.AmWorkType == WorkTypes.OHC) {
+                    result += user.FirstName + " ";
+                    rotaDay = new RotaDay();
+                    rotaDay.UserID = user.ID;
+                    rotaDay.RotaDate = rotaDate;
+                    _context.Add(rotaDay);
+                    _context.SaveChanges();
+                    sortedList.Remove(user);
+                    count--;
+                    break;
+                }         
+            }
 
-                result += user.FirstName + " ";
-                rotaDay = new RotaDay();
-                rotaDay.UserID = user.ID;
-                rotaDay.RotaDate = rotaDate;
-                _context.Add(rotaDay);
-                _context.SaveChanges();
-                count--;
-                if (count == 0) break;
-
-
+            //Then add other users
+            foreach (UserRota user in sortedList)
+            {
+                if (!user.IsAmOff)
+                {
+                    result += user.FirstName + " ";
+                    rotaDay = new RotaDay();
+                    rotaDay.UserID = user.ID;
+                    rotaDay.RotaDate = rotaDate;
+                    _context.Add(rotaDay);
+                    _context.SaveChanges();
+                    count--;
+                    if (count == 0) break;
+                }
             }
 
             return result;
