@@ -1,11 +1,15 @@
-﻿using DayOff.Data;
+﻿using ASPNETCoreScheduler.Scheduler;
+using DayOff.Data;
 using DaysOff.Models.LeelaBack;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace DayOff
 {
@@ -21,7 +25,7 @@ namespace DayOff
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.AddSingleton<IHostedService, ScheduleTask>();
             services.AddDbContext<DayOffContext>(options =>
                  options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddDbContext<LeelaBackContext>(options =>
@@ -39,7 +43,7 @@ namespace DayOff
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {
