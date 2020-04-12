@@ -221,29 +221,8 @@ namespace DaysOff.Controllers
                 userRow = new List<EventBase>();
                 foreach (DateTime date in headerDates)
                 {
-                    Holiday holData = _context.Holidays.Where(h => h.UserID == user.ID && h.HolDate == date && h.Duration == 0).FirstOrDefault();
-                    if (date < user.StartDate || date > user.EndDate) {
-                        userRow.Add(new WorkBase(-2, 0, 0, date, user.ID));
-                    }
-                    else {
-                        if (holData == null)
-                        {
-                            WorkDay workData = _context.WorkDays.Where(w => w.UserID == user.ID && w.WorkDate == date && w.Duration == 0).FirstOrDefault();
-                            if (workData == null)
-                            {
-                                userRow.Add(new WorkBase(-1, 0, 0, date, user.ID));
-                            }
-                            else
-                            {
-                                userRow.Add(new WorkBase(workData.WorkID, (WorkTypes)workData.WorkType, (Durations)workData.Duration, date, user.ID));
-                            }
-                        }
-                        else
-                        {
-                            userRow.Add(new HolidayBase(holData.HolidayID, (HolTypes)holData.HolType, (Durations)holData.Duration, holData.HolDate, user.ID));
-                        }
-                    }
 
+                    userRow.Add(WeekDataCreator.getData(date, user, _context, 0));
                 }
                 UserDataRow userDataRow = new UserDataRow();
                 userDataRow.User = user;
@@ -253,30 +232,7 @@ namespace DaysOff.Controllers
                 userRow = new List<EventBase>();
                 foreach (DateTime date in headerDates)
                 {
-                    Holiday holData = _context.Holidays.Where(h => h.UserID == user.ID && h.HolDate == date && h.Duration == (Durations)1).FirstOrDefault();
-                    if (date < user.StartDate || date > user.EndDate)
-                    {
-                        userRow.Add(new WorkBase(-2, 0, (Durations)1, date, user.ID));
-
-                    }
-                    else {
-                        if (holData == null)
-                        {
-                            WorkDay workData = _context.WorkDays.Where(w => w.UserID == user.ID && w.WorkDate == date && w.Duration == (Durations)1).FirstOrDefault();
-                            if (workData == null)
-                            {
-                                userRow.Add(new WorkBase(-1, 0, (Durations)1, date, user.ID));
-                            }
-                            else
-                            {
-                                userRow.Add(new WorkBase(workData.WorkID, (WorkTypes)workData.WorkType, (Durations)workData.Duration, date, user.ID));
-                            }
-                        }
-                        else
-                        {
-                            userRow.Add(new HolidayBase(holData.HolidayID, (HolTypes)holData.HolType, (Durations)holData.Duration, holData.HolDate, user.ID));
-                        }
-                    }
+                    userRow.Add(WeekDataCreator.getData(date, user, _context, 1));
 
                 }
                 userDataRow = new UserDataRow();
