@@ -216,12 +216,17 @@ namespace DaysOff.Controllers
             eventData.DayCount = eventCountArray;
 
             List<IUserBase> users = getActiveUsers(from,to);
+            List<DayWorkObj> dayWorkObjs = new List<DayWorkObj>();
+            foreach (DateTime date in headerDates)
+            {
+                dayWorkObjs.Add(WeekDataCreator.getDayWorkObj(date, _context,users));
+            }
+
             foreach (UserBase user in users)
             {
                 userRow = new List<EventBase>();
                 foreach (DateTime date in headerDates)
                 {
-
                     userRow.Add(WeekDataCreator.getData(date, user, _context, 0));
                 }
                 UserDataRow userDataRow = new UserDataRow();
@@ -233,7 +238,6 @@ namespace DaysOff.Controllers
                 foreach (DateTime date in headerDates)
                 {
                     userRow.Add(WeekDataCreator.getData(date, user, _context, 1));
-
                 }
                 userDataRow = new UserDataRow();
                 userDataRow.User = user;
@@ -241,6 +245,7 @@ namespace DaysOff.Controllers
                 userDataRows.Add(userDataRow);
             }
 
+            weekData.DayWorkObjs = dayWorkObjs;
             weekData.HeaderDates = headerDates;
             weekData.UserDataRows = userDataRows;
             weekData.EventData = eventData;
