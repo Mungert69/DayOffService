@@ -12,42 +12,42 @@ namespace DaysOff.Objects
 
         public static DayWorkObj getDayWorkObj(DateTime date, DayOffContext _context,List<IUserBase> users){
             DayWorkObj dayWorkObj = new DayWorkObj();
-            dayWorkObj.DayOffWeek = date.DayOfWeek.ToString();
+            dayWorkObj.DayOfWeek = date.DayOfWeek.ToString();
             WorkDay workData = _context.WorkDays.Where(w => w.WorkDate == date && w.Duration == (Durations)0 && w.WorkType==WorkTypes.OHC).FirstOrDefault();
             if (workData != null)
             {
-                dayWorkObj.OhcAm = "OHC-AM-" + users.Where(u => u.ID==workData.UserID).First().FirstName;
+                dayWorkObj.OhcAm =  users.Where(u => u.ID==workData.UserID).First().FirstName;
             }
             else {
-                dayWorkObj.OhcAm = "OHC-AM-" ;
+                dayWorkObj.OhcAm = "---" ;
             }
             workData = _context.WorkDays.Where(w =>  w.WorkDate == date && w.Duration == (Durations)1 && w.WorkType == WorkTypes.OHC).FirstOrDefault();
             if (workData != null)
             {
-                dayWorkObj.OhcPm = "OHC-PM-" + users.Where(u => u.ID == workData.UserID).First().FirstName;
+                dayWorkObj.OhcPm =   users.Where(u => u.ID == workData.UserID).First().FirstName;
             }
             else
             {
-                dayWorkObj.OhcPm = "OHC-PM-";
+                dayWorkObj.OhcPm = "---";
             }
 
             workData = _context.WorkDays.Where(w => w.WorkDate == date && w.Duration == (Durations)0 && w.WorkType == WorkTypes.MC).FirstOrDefault();
             if (workData != null)
             {
-                dayWorkObj.McAm = "MC-AM-" + users.Where(u => u.ID == workData.UserID).First().FirstName;
+                dayWorkObj.McAm =  users.Where(u => u.ID == workData.UserID).First().FirstName;
             }
             else
             {
-                dayWorkObj.McAm = "MC-AM-";
+                dayWorkObj.McAm = "---";
             }
             workData = _context.WorkDays.Where(w =>  w.WorkDate == date && w.Duration == (Durations)1 && w.WorkType == WorkTypes.MC).FirstOrDefault();
             if (workData != null)
             {
-                dayWorkObj.McPm = "MC-PM-" + users.Where(u => u.ID == workData.UserID).First().FirstName;
+                dayWorkObj.McPm =  users.Where(u => u.ID == workData.UserID).First().FirstName;
             }
             else
             {
-                dayWorkObj.McPm = "MC-PM-";
+                dayWorkObj.McPm = "---";
             }
             return dayWorkObj;
 }

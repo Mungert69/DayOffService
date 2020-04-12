@@ -12,12 +12,12 @@ namespace DaysOff.Objects
         private string ohcPm;
         private string mcAm;
         private string mcPm;
-        private string dayOffWeek;
+        private string dayOfWeek;
 
         public string OhcAm { get => ohcAm; set => ohcAm = value; }
         public string OhcPm { get => ohcPm; set => ohcPm = value; }
         public string McAm { get => mcAm; set => mcAm = value; }
         public string McPm { get => mcPm; set => mcPm = value; }
-        public string DayOffWeek { get => dayOffWeek; set => dayOffWeek = value; }
+        public string DayOfWeek { get => dayOfWeek; set => dayOfWeek = value; }
     }
 }
