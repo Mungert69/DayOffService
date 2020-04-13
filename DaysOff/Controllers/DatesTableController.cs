@@ -216,10 +216,11 @@ namespace DaysOff.Controllers
             eventData.DayCount = eventCountArray;
 
             List<IUserBase> users = getActiveUsers(from,to);
+            List<IUserBase> allUsers = DataBaseHelper.getAllUsers( _context);
             List<DayWorkObj> dayWorkObjs = new List<DayWorkObj>();
             foreach (DateTime date in headerDates)
             {
-                dayWorkObjs.Add(WeekDataCreator.getDayWorkObj(date, _context,users));
+                dayWorkObjs.Add(WeekDataCreator.getDayWorkObj(date, _context,allUsers));
             }
 
             foreach (UserBase user in users)
