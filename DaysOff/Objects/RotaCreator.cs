@@ -219,7 +219,7 @@ namespace DaysOff.Objects
             workBases = DataBaseHelper.getWorkDay(checkDate, checkDate, _context);
 
             // We only print TLPs for now.
-            usersBases = DataBaseHelper.getActiveTLPs(checkDate, checkDate, _context);
+            usersBases = DataBaseHelper.getActiveUsers(checkDate, checkDate, _context);
             users = new List<UserRota>();
             foreach (UserBase userBase in usersBases)
             {
@@ -347,6 +347,7 @@ namespace DaysOff.Objects
                     int rowRight = rowStart;
                     foreach (UserRota user in Users)
                     {
+                        if (user.UserType == UserBase.UserTypes.Core) continue;
                         if (user.IsAmOff && user.IsPmOff)
                         {
                             col = 1;
