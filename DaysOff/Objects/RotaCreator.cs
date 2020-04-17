@@ -218,8 +218,8 @@ namespace DaysOff.Objects
         {
             workBases = DataBaseHelper.getWorkDay(checkDate, checkDate, _context);
 
-
-            usersBases = DataBaseHelper.getActiveUsers(checkDate, checkDate, _context);
+            // We only print TLPs for now.
+            usersBases = DataBaseHelper.getActiveTLPs(checkDate, checkDate, _context);
             users = new List<UserRota>();
             foreach (UserBase userBase in usersBases)
             {
