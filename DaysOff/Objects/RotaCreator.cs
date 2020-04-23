@@ -331,8 +331,8 @@ namespace DaysOff.Objects
                         keyString = "row" + workBase.DurationString() + workBase.ExcelCol();
                         cellLoc = workBase.ExcelCol() + rowDic[keyString].ToString();
                         rowDic[keyString] = rowDic[keyString] + 1;
-                        valueString = workBase.UserName;
-                        if (workBase.ExcelCol() == "F" || workBase.WorkType == 0 || workBase.WorkType == (WorkTypes)2) { valueString = workBase.UserName + " - " + workBase.WorkType.ToString(); }
+                        valueString = workBase.UserName + " - " + workBase.WorkType.ToString();
+                        //if (workBase.ExcelCol() == "F" || workBase.WorkType == 0 || workBase.WorkType == (WorkTypes)2) { valueString = workBase.UserName + " - " + workBase.WorkType.ToString(); }
                         worksheet.Cells[cellLoc].Value = valueString;
                     }
                     catch (Exception e)
@@ -347,7 +347,7 @@ namespace DaysOff.Objects
                     int rowRight = rowStart;
                     foreach (UserRota user in Users)
                     {
-                        if (user.UserType == UserBase.UserTypes.Core) continue;
+                        //if (user.UserType == UserBase.UserTypes.Core) continue;
                         if (user.IsAmOff && user.IsPmOff)
                         {
                             col = 1;
