@@ -6,7 +6,7 @@ namespace DaysOff.Objects
     {
         public enum UserTypes
         {
-            RAP, TLP, Core, Director
+            RAP, TLP, Core, Director, Worker
         }
 
         public UserBase() { }
