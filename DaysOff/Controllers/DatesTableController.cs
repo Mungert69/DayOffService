@@ -344,49 +344,54 @@ namespace DaysOff.Controllers
 
         // GET api/DatesTable/DeleteEvent/holidayID 
         [HttpGet("DeleteEvent/{eventId}/{eventType}")]
-        public IActionResult DeleteEvent([FromRoute] int eventId, [FromRoute] int eventType)
+        public ActionResult<ResultObj> DeleteEvent([FromRoute] int eventId, [FromRoute] int eventType)
         {
-            string result = "Delete failed.";
+            ResultObj result = new ResultObj();
+            result.Message = "Delete failed.";
+            result.Success=false;
 
             try
             {
                 deleteIntEvent(eventId, eventType);
             }
 
-            catch (Exception e) { return Ok(JsonUtils.ConvertJsonStr(result + " : " + e.Message)); }
-            result = "Deleted ok.";
-            return Ok(JsonUtils.ConvertJsonStr(result));
+            catch (Exception e) { result.Message= result.Message + " : " + e.Message;
+                return result;
+            }
+            result.Message = "Deleted OK.";
+            result.Success = true;
+            return result;
             ;
         }
 
 
-        private string createIntEvent(int eventType, string dateStr, int userId, int duration, int type)
+        private void createIntEvent(int eventType, string dateStr, int userId, int duration, int type, ResultObj result)
         {
-            string result;
+            result.Success= false;
             DateTime eventDate;
             if (eventType == 0)
             {
                 eventDate = DateTime.Parse(dateStr);
                 if (type==1 && countDaysOk(eventDate, userId, duration, type))
                 {
-                    result = "To many days off taken this week.";
-                    return result;
+                    result.Message = "To many days off taken this week.";
+                    return ;
                 }
                  if (type==0 && countHolidaysOk(eventDate, userId, duration, type))
                {
-                   result = "To many holidays taken in contract period.";
-                   return result;
+                   result.Message = "To many holidays taken in contract period.";
+                    return ;
                }
 
                 if (staffCountOk(eventDate, type, duration))
                 {
                     if (duration == 0) {
-                        result = "To many staff off in the morning of this day.";
+                        result.Message = "To many staff off in the morning of this day.";
                     }
                     else {
-                        result = "To many staff off in the afternoon of this day.";
+                        result.Message = "To many staff off in the afternoon of this day.";
                     }
-                    return result;
+                    return ;
                 }
               
                 DayOff.Models.Holiday holiday = new Holiday();
@@ -413,53 +418,66 @@ namespace DaysOff.Controllers
                 _context.Add(workDay);
                 _context.SaveChanges();
             }
-            return "Created ok.";
+            result.Message= "Created ok.";
+            result.Success = true;
         }
 
         // GET api/DatesTable/UpdateHoliday/userId/type/duration/date 
         [HttpGet("CreateEvent/{userId}/{type}/{duration}/{dateStr}/{eventType}")]
-        public IActionResult CreateEvent([FromRoute] int userId, [FromRoute] int type, [FromRoute] int duration, [FromRoute] string dateStr, [FromRoute] int eventType)
+        public ActionResult<ResultObj> CreateEvent([FromRoute] int userId, [FromRoute] int type, [FromRoute] int duration, [FromRoute] string dateStr, [FromRoute] int eventType)
         {
-            string result = "";
-
-
+            ResultObj result = new ResultObj();
+            result.Message = "Create failed.";
+            result.Success = false;
 
             try
             {
-                result = createIntEvent(eventType, dateStr, userId, duration, type);
-                return Ok(JsonUtils.ConvertJsonStr(result));
+                createIntEvent(eventType, dateStr, userId, duration, type, result);
+                return result;
 
             }
-            catch (Exception e) { return Ok(JsonUtils.ConvertJsonStr(result + " : " + e.Message)); }
+            catch (Exception e) { 
+                result.Message= result.Message + " : " + e.Message;
+                return result;
+            }
 
         }
 
         // GET api/DatesTable/UpdateHoliday/userId/type/duration/date 
         [HttpGet("SwapEvent/{userId}/{type}/{duration}/{dateStr}/{eventType}/{oldEventType}/{eventId}")]
-        public IActionResult SwapEvent([FromRoute] int userId, [FromRoute] int type, [FromRoute] int duration, [FromRoute] string dateStr, [FromRoute] int eventType, [FromRoute] int oldEventType, [FromRoute] int eventId)
+        public ActionResult<ResultObj> SwapEvent([FromRoute] int userId, [FromRoute] int type, [FromRoute] int duration, [FromRoute] string dateStr, [FromRoute] int eventType, [FromRoute] int oldEventType, [FromRoute] int eventId)
         {
-            string result = "";
+            ResultObj result = new ResultObj();
+            result.Message = "Update Failed.";
+            result.Success = false;
+
 
             try
             {
                 deleteIntEvent(eventId, oldEventType);
-                result = createIntEvent(eventType, dateStr, userId, duration, type);
-                return Ok(JsonUtils.ConvertJsonStr(result));
+                createIntEvent(eventType, dateStr, userId, duration, type, result);
+                return result;
 
             }
-            catch (Exception e) { return Ok(JsonUtils.ConvertJsonStr(result + " : " + e.Message)); }
+            catch (Exception e) {
+                result.Message = result.Message + " : " + e.Message;
+                return result; }
 
         }
 
 
         // GET api/DatesTable/UpdateEvent/id/type/duration 
         [HttpGet("UpdateEvent/{id}/{type}/{duration}/{eventType}")]
-        public IActionResult UpdateEvent([FromRoute] int id, [FromRoute] int type, [FromRoute] int duration, [FromRoute] int eventType)
+        public ActionResult<ResultObj> UpdateEvent([FromRoute] int id, [FromRoute] int type, [FromRoute] int duration, [FromRoute] int eventType)
         {
-            string result = "Update failed.";
+            ResultObj result = new ResultObj();
+            result.Message = "Update failed.";
+            result.Success = false;
+
             if (id == -1)
             {
-                return Ok(JsonUtils.ConvertJsonStr("Update failed. HolidayID=-1"));
+                result.Message = "Update failed. HolidayID=-1";
+                return result;
 
             }
 
@@ -484,28 +502,29 @@ namespace DaysOff.Controllers
                        
                         _context.Add(holiday);
                         _context.SaveChanges();
-                        result = "To many days off taken this week.";
-                        return Ok(JsonUtils.ConvertJsonStr(result));
+                        result.Message = "To many days off taken this week.";
+                        return result;
                     }
                     if (type == 0 && countHolidaysOk(holDate, userId, duration, type))
                     {
                         _context.Add(holiday);
                         _context.SaveChanges();
-                        result = "To many holidays taken in contract period.";
-                        return Ok(JsonUtils.ConvertJsonStr(result));
+                        result.Message = "To many holidays taken in contract period.";
+                        return result;
                     }
                     if (staffCountOk(holDate, type, duration))
                     {
                         _context.Add(holiday);
                         _context.SaveChanges();
                         if (duration == 0) {
-                            result = "To many staff off in the morning of this day.";
+                            result.Message = "To many staff off in the morning of this day.";
+
                         }
                         else {
-                            result = "To many staff off in the afternoon of this day.";
+                            result.Message = "To many staff off in the afternoon of this day.";
                         }
 
-                        return Ok(JsonUtils.ConvertJsonStr(result));
+                        return result;
                        
                     }
                    
@@ -540,8 +559,9 @@ namespace DaysOff.Controllers
             }
             catch (Exception e) { return Ok(JsonUtils.ConvertJsonStr(result + " : " + e.Message)); }
 
-            result = "Updated Ok.";
-            return Ok(JsonUtils.ConvertJsonStr(result));
+            result.Message = "Updated Ok.";
+            result.Success = true;
+            return result;
         }
         // PUT api/DatesTable/5
         [HttpPut("{id}")]
