@@ -174,9 +174,9 @@ namespace DaysOff.Controllers
             DateTime to;
               try
             {
-                CultureInfo culture = new CultureInfo("en-US");
-                from = DateTime.Parse(fromStr,culture);
-                to = DateTime.Parse(toStr, culture);
+                
+                from = DateTime.Parse(fromStr);
+                to = DateTime.Parse(toStr);
             }
             catch { return null; }
 
@@ -384,8 +384,8 @@ namespace DaysOff.Controllers
             DateTime eventDate;
             if (eventType == 0)
             {
-                CultureInfo culture = new CultureInfo("en-US");
-                eventDate = DateTime.Parse(dateStr,culture);
+                
+                eventDate = DateTime.Parse(dateStr);
                 if (type==1 && countDaysOk(eventDate, userId, duration, type))
                 {
                     result.Message = "To many days off taken this week.";
