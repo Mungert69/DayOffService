@@ -7,6 +7,7 @@ using DaysOff.Utils;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using static DaysOff.Objects.UserBase;
 
@@ -173,8 +174,9 @@ namespace DaysOff.Controllers
             DateTime to;
               try
             {
-                from = DateTime.Parse(fromStr);
-                to = DateTime.Parse(toStr);
+                CultureInfo culture = new CultureInfo("en-US");
+                from = DateTime.Parse(fromStr,culture);
+                to = DateTime.Parse(toStr, culture);
             }
             catch { return null; }
 
@@ -195,22 +197,33 @@ namespace DaysOff.Controllers
             int[] eventCountArray = new int[7];
             int counter = 0;
             List<Events> eventItems = new List<Events>();
-            foreach (DateTime headerDate in headerDates) {
-                List<Events> events = _contextLeelaBack.Events.Where(e => headerDate >= e.EventStart && headerDate <= e.EventEnd && (e.EventEnd - e.EventStart).Value.TotalDays < 15 && e.EventCancelled==null).ToList();
-                if (events.Count()>0) {
-                    foreach (Events eventItem in events) {
-                        if (!eventItems.Contains(eventItem)){
-                            eventItems.Add(eventItem);
+            try {
+               /* foreach (DateTime headerDate in headerDates)
+                {
+                    List<Events> events = _contextLeelaBack.Events.Where(e => headerDate >= e.EventStart && headerDate <= e.EventEnd && (e.EventEnd - e.EventStart).Value.TotalDays < 15 && e.EventCancelled == null).ToList();
+                    if (events.Count() > 0)
+                    {
+                        foreach (Events eventItem in events)
+                        {
+                            if (!eventItems.Contains(eventItem))
+                            {
+                                eventItems.Add(eventItem);
+                            }
                         }
+                        eventCountArray[counter] = events.Count();
                     }
-                    eventCountArray[counter] = events.Count();
+                    else
+                    {
+                        eventCountArray[counter] = 0;
+                    }
+                    counter++;
                 }
-                else {
-                    eventCountArray[counter] = 0;
-                }
-                counter++;
+                */
             }
-
+            catch (Exception e) {
+                string test = "";
+            }
+           
             EventData eventData = new EventData();
             eventData.EventItems = eventItems;
             eventData.DayCount = eventCountArray;
@@ -371,7 +384,8 @@ namespace DaysOff.Controllers
             DateTime eventDate;
             if (eventType == 0)
             {
-                eventDate = DateTime.Parse(dateStr);
+                CultureInfo culture = new CultureInfo("en-US");
+                eventDate = DateTime.Parse(dateStr,culture);
                 if (type==1 && countDaysOk(eventDate, userId, duration, type))
                 {
                     result.Message = "To many days off taken this week.";
